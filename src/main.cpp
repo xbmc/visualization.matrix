@@ -490,9 +490,25 @@ void CVisualizationMatrix::Launch(int preset)
       }
     }
   }
-
+  // Audio
   m_channelTextures[0] = CreateTexture(GL_RED, NUM_BANDS, 2, m_audioData);
+  // Logo
+  if (!m_shaderTextures[1].texture.empty())
+  {
+    m_channelTextures[1] = CreateTexture(m_shaderTextures[1].texture, GL_RED, GL_NEAREST, GL_CLAMP_TO_EDGE);
+  }
+  // Noise
+  if (!m_shaderTextures[2].texture.empty())
+  {
+    m_channelTextures[2] = CreateTexture(m_shaderTextures[2].texture, GL_RED, GL_LINEAR, GL_REPEAT);
+  }
+  // Album
+  if (!m_shaderTextures[3].texture.empty())
+  {
+    m_channelTextures[3] = CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_REPEAT);
+  }
 
+  /*
   for (int i = 1; i < 4; i++)
   {
     if (!m_shaderTextures[i].texture.empty())
@@ -503,6 +519,7 @@ void CVisualizationMatrix::Launch(int preset)
       m_channelTextures[i] = CreateTexture(m_shaderTextures[i].texture, format, scaling, repeat);
     }
   }
+  */
 
   const int size1 = 256, size2=512;
   double t1 = MeasurePerformance(m_usedShaderFile, size1);

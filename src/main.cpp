@@ -491,13 +491,11 @@ void CVisualizationMatrix::Launch(int preset)
     }
   }
 
-  for (int i = 0; i < 4; i++)
+  m_channelTextures[0] = CreateTexture(GL_RED, NUM_BANDS, 2, m_audioData);
+
+  for (int i = 1; i < 4; i++)
   {
-    if (m_shaderTextures[i].audio)
-    {
-      m_channelTextures[i] = CreateTexture(GL_RED, NUM_BANDS, 2, m_audioData);
-    }
-    else if (!m_shaderTextures[i].texture.empty())
+    if (!m_shaderTextures[i].texture.empty())
     {
       GLint format = GL_RGBA;
       GLint scaling = GL_LINEAR;

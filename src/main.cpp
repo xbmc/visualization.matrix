@@ -26,7 +26,7 @@
 #include <chrono>
 #include <math.h>
 
-#define SMOOTHING_TIME_CONSTANT (0.8)
+#define SMOOTHING_TIME_CONSTANT (0.5) // default 0.8
 #define MIN_DECIBELS (-100.0)
 #define MAX_DECIBELS (-30.0)
 

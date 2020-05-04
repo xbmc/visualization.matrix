@@ -109,7 +109,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     float fft = texture( iChannel0, vec2((1.-abs(uv.x-distort*.2))*.7,0.0) ).x;
     //float fft = texture( iChannel0, vec2((1.-abs(uv.x))*.7,0.0) ).x;
     fft *= (3.2 -abs(0.-uv.x*1.3))*0.75;
-    fft *= 2.;
+    fft *= 1.8;
     //fft *= 3.;
     
     bw=bw+bw*fft*0.4;

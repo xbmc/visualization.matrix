@@ -521,6 +521,7 @@ void CVisualizationMatrix::Launch(int preset)
   }
   */
 
+  /*
   const int size1 = 256, size2=512;
   double t1 = MeasurePerformance(m_usedShaderFile, size1);
   double t2 = MeasurePerformance(m_usedShaderFile, size2);
@@ -542,7 +543,9 @@ void CVisualizationMatrix::Launch(int preset)
 #ifdef DEBUG_PRINT
   printf("expected fps=%f, pixels=%f %dx%d (A:%f B:%f t1:%.1f t2:%.1f)\n", expected_fps, pixels, m_state.fbwidth, m_state.fbheight, A, B, t1, t2);
 #endif
-
+  */
+  m_state.fbwidth = Width();
+  m_state.fbheight = Height();
   LoadPreset(m_usedShaderFile);
 }
 

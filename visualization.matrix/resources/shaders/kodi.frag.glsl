@@ -1,4 +1,4 @@
-#define DOTSIZE 5.
+#define DOTSIZE 4.
 #define RNDSEED1 170.12
 #define RNDSEED2 7572.1
 #define FALLSPEED 4. //depends on height - I think

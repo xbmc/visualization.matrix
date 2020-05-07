@@ -732,6 +732,7 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   int width,height,n;
   //n = 1;
   unsigned char* image;
+  stbi_set_flip_vertically_on_load(true);
   image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
 
   if (image == nullptr)

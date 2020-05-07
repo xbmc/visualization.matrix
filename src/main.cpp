@@ -21,6 +21,18 @@
 #include "main.h"
 #include "lodepng.h"
 
+#include <regex>
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ONLY_JPEG
+#define STBI_ONLY_PNG
+#define STBI_ONLY_BMP
+#include "stb_image.h"
+#include "kodi/Filesystem.h"
+#include "kodi/libXBMC_addon.h"
+
+
+
 #define _USE_MATH_DEFINES
 #include <algorithm>
 #include <chrono>
@@ -329,6 +341,37 @@ bool CVisualizationMatrix::GetPresets(std::vector<std::string>& presets)
 int CVisualizationMatrix::GetActivePreset()
 {
   return m_currentPreset;
+}
+
+bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
+{
+  std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
+  thumb = thumb.substr(0,8);
+  std::string special = std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();
+  if (kodi::vfs::FileExists(special + std::string(".png")))
+  {
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  }
+  else if (kodi::vfs::FileExists(special + std::string(".jpg")))
+  {
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  }
+
+  /*
+  std::string path = kodi::vfs::TranslateSpecialProtocol(special.c_str());
+  std::string fileName = kodi::vfs::MakeLegalFileName(special.c_str());
+  if (kodi::vfs::FileExists(special))
+  printf("%s\n",special.c_str());
+  printf("%s\n",thumb.c_str());
+  printf("%s\n",path.c_str());
+  printf("%s\n",fileName.c_str());*/
+  //m_channelTextures[3] = CreateTexture(special.c_str(), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  if (m_channelTextures[3] == 0)
+  {
+    return false;
+  }
+
+  return true;
 }
 
 void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
@@ -673,6 +716,7 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   printf("creating texture %s\n", file.c_str());
 #endif
 
+  /*
   unsigned error;
   unsigned char* image;
   unsigned width, height;
@@ -683,9 +727,28 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
     kodi::Log(ADDON_LOG_ERROR, "lodepng_decode32_file error %u: %s", error, lodepng_error_text(error));
     return 0;
   }
+  */
+
+  int width,height,n;
+  //n = 1;
+  unsigned char* image;
+  image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
+
+  if (image == nullptr)
+  {
+    kodi::Log(ADDON_LOG_ERROR, "couldn't load image");
+    return 0;
+  }
+  printf("####\n");
+  printf("w=%i,h=%i,n=%i\n",width,height,n);
+  
 
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
-  free(image);
+  stbi_image_free(image);
+  image = nullptr;
+
+  //GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
+  //free(image);
   return texture;
 }
 

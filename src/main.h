@@ -46,6 +46,7 @@ public:
   bool NextPreset() override;
   bool LoadPreset(int select) override;
   bool RandomPreset() override;
+  bool UpdateAlbumart(std::string albumart) override;
 
 private:
   void RenderTo(GLuint shader, GLuint effect_fb);

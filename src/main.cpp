@@ -348,30 +348,21 @@ bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
   std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
   thumb = thumb.substr(0,8);
   std::string special = std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();
+
   if (kodi::vfs::FileExists(special + std::string(".png")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_BORDER);//FIXME: border clamping not supported by gles 2.0
+    return true;
   }
   else if (kodi::vfs::FileExists(special + std::string(".jpg")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_BORDER);//FIXME: border clamping not supported by gles 2.0
+    return true;
   }
 
-  /*
-  std::string path = kodi::vfs::TranslateSpecialProtocol(special.c_str());
-  std::string fileName = kodi::vfs::MakeLegalFileName(special.c_str());
-  if (kodi::vfs::FileExists(special))
-  printf("%s\n",special.c_str());
-  printf("%s\n",thumb.c_str());
-  printf("%s\n",path.c_str());
-  printf("%s\n",fileName.c_str());*/
-  //m_channelTextures[3] = CreateTexture(special.c_str(), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
-  if (m_channelTextures[3] == 0)
-  {
-    return false;
-  }
-
-  return true;
+  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/logo.png"), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  
+  return false;
 }
 
 void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)

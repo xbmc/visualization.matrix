@@ -69,7 +69,6 @@ const std::vector<std::string> g_fileTextures =
 {
   "logo.png",
   "noise.png",
-  "album.png",
 };
 
 #if defined(HAS_GL)
@@ -497,7 +496,7 @@ void CVisualizationMatrix::Launch(int preset)
   {
     if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < g_fileTextures.size())
     {
-      m_shaderTextures[i].texture = kodi::GetAddonPath("resources/" + g_fileTextures[g_presets[preset].channel[i]]);
+      m_shaderTextures[i].texture = kodi::GetAddonPath("resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
     }
     else if (g_presets[preset].channel[i] == 99) // framebuffer
     {

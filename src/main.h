@@ -63,7 +63,7 @@ private:
   void SmoothingOverTime(float* outputBuffer, float* lastOutputBuffer, kiss_fft_cpx* inputBuffer, size_t length, float smoothingTimeConstant, unsigned int fftSize);
   float LinearToDecibels(float linear);
   int DetermineBitsPrecision();
-  double MeasurePerformance(const std::string& shaderPath, int size);
+  //double MeasurePerformance(const std::string& shaderPath, int size);
 
   kiss_fft_cfg m_kissCfg;
   GLubyte* m_audioData;

@@ -781,6 +781,7 @@ int CVisualizationMatrix::DetermineBitsPrecision()
   UnloadPreset();
   return bits;
 }
+/*
 
 double CVisualizationMatrix::MeasurePerformance(const std::string& shaderPath, int size)
 {
@@ -805,5 +806,5 @@ double CVisualizationMatrix::MeasurePerformance(const std::string& shaderPath, i
   UnloadPreset();
   return t;
 }
-
+*/
 ADDONCREATOR(CVisualizationMatrix) // Don't touch this!

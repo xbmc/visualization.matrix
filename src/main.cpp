@@ -492,36 +492,21 @@ void CVisualizationMatrix::Launch(int preset)
 
   UnloadTextures();
 
-  if (preset < 0)
+  m_usedShaderFile = kodi::GetAddonPath("resources/shaders/" + g_presets[preset].file);
+  for (int i = 0; i < 4; i++)
   {
-    m_usedShaderFile = kodi::GetSettingString("shader");
-    m_shaderTextures[0].audio = kodi::GetSettingBoolean("texture0-sound");
-    m_shaderTextures[0].texture = kodi::GetSettingString("texture0");
-    m_shaderTextures[1].audio = kodi::GetSettingBoolean("texture1-sound");
-    m_shaderTextures[1].texture = kodi::GetSettingString("texture1");
-    m_shaderTextures[2].audio = kodi::GetSettingBoolean("texture2-sound");
-    m_shaderTextures[2].texture = kodi::GetSettingString("texture2");
-    m_shaderTextures[3].audio = kodi::GetSettingBoolean("texture3-sound");
-    m_shaderTextures[3].texture = kodi::GetSettingString("texture3");
-  }
-  else
-  {
-    m_usedShaderFile = kodi::GetAddonPath("resources/shaders/" + g_presets[preset].file);
-    for (int i = 0; i < 4; i++)
+    if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < g_fileTextures.size())
     {
-      if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < g_fileTextures.size())
-      {
-        m_shaderTextures[i].texture = kodi::GetAddonPath("resources/" + g_fileTextures[g_presets[preset].channel[i]]);
-      }
-      else if (g_presets[preset].channel[i] == 99) // framebuffer
-      {
-        m_shaderTextures[i].audio = true;
-      }
-      else
-      {
-        m_shaderTextures[i].texture = "";
-        m_shaderTextures[i].audio = false;
-      }
+      m_shaderTextures[i].texture = kodi::GetAddonPath("resources/" + g_fileTextures[g_presets[preset].channel[i]]);
+    }
+    else if (g_presets[preset].channel[i] == 99) // framebuffer
+    {
+      m_shaderTextures[i].audio = true;
+    }
+    else
+    {
+      m_shaderTextures[i].texture = "";
+      m_shaderTextures[i].audio = false;
     }
   }
   // Audio

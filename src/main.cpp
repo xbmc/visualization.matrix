@@ -280,45 +280,33 @@ void CVisualizationMatrix::AudioData(const float* pAudioData, int iAudioDataLeng
 //-----------------------------------------------------------------------------
 bool CVisualizationMatrix::NextPreset()
 {
-  if (!m_settingsUseOwnshader)
-  {
-    m_currentPreset = (m_currentPreset + 1) % g_presets.size();
-    Launch(m_currentPreset);
-    kodi::SetSettingInt("lastpresetidx", m_currentPreset);
-  }
+  m_currentPreset = (m_currentPreset + 1) % g_presets.size();
+  Launch(m_currentPreset);
+  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
 bool CVisualizationMatrix::PrevPreset()
 {
-  if (!m_settingsUseOwnshader)
-  {
-    m_currentPreset = (m_currentPreset - 1) % g_presets.size();
-    Launch(m_currentPreset);
-    kodi::SetSettingInt("lastpresetidx", m_currentPreset);
-  }
+  m_currentPreset = (m_currentPreset - 1) % g_presets.size();
+  Launch(m_currentPreset);
+  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
 bool CVisualizationMatrix::LoadPreset(int select)
 {
-  if (!m_settingsUseOwnshader)
-  {
-    m_currentPreset = select % g_presets.size();
-    Launch(m_currentPreset);
-    kodi::SetSettingInt("lastpresetidx", m_currentPreset);
-  }
+  m_currentPreset = select % g_presets.size();
+  Launch(m_currentPreset);
+  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
 bool CVisualizationMatrix::RandomPreset()
 {
-  if (!m_settingsUseOwnshader)
-  {
-    m_currentPreset = (int)((std::rand() / (float)RAND_MAX) * g_presets.size());
-    Launch(m_currentPreset);
-    kodi::SetSettingInt("lastpresetidx", m_currentPreset);
-  }
+  m_currentPreset = (int)((std::rand() / (float)RAND_MAX) * g_presets.size());
+  Launch(m_currentPreset);
+  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
@@ -327,11 +315,8 @@ bool CVisualizationMatrix::RandomPreset()
 //-----------------------------------------------------------------------------
 bool CVisualizationMatrix::GetPresets(std::vector<std::string>& presets)
 {
-  if (!m_settingsUseOwnshader)
-  {
-    for (auto preset : g_presets)
-      presets.push_back(preset.name);
-  }
+  for (auto preset : g_presets)
+    presets.push_back(preset.name);
   return true;
 }
 

@@ -64,6 +64,7 @@ const std::vector<Preset> g_presets =
    {"Kodi",                                     "kodi.frag.glsl",                   99,  0,  1, -1},
    {"Album",                                    "album.frag.glsl",                  99,  0,  1,  2},
    {"No Logo",                                  "nologo.frag.glsl",                 99,  0,  1,  2},
+   {"Clean",                                    "clean.frag.glsl",                  99,  0,  1,  2},
 };
 
 const std::vector<std::string> g_fileTextures =

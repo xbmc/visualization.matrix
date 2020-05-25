@@ -104,7 +104,6 @@ private:
     int fbwidth, fbheight;
   } m_state;
 
-  bool m_settingsUseOwnshader = false;
   std::string m_usedShaderFile;
   struct ShaderPath
   {

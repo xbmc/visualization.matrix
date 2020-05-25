@@ -82,6 +82,7 @@ R"shader(#version 150
 
 uniform vec3 iResolution;
 uniform float iGlobalTime;
+uniform float iDotSize;
 uniform float iChannelTime[4];
 uniform vec4 iMouse;
 uniform vec4 iDate;
@@ -124,6 +125,7 @@ precision mediump int;
 
 uniform vec3 iResolution;
 uniform float iGlobalTime;
+uniform float iDotSize;
 uniform float iChannelTime[4];
 uniform vec4 iMouse;
 uniform vec4 iDate;
@@ -166,11 +168,8 @@ CVisualizationMatrix::CVisualizationMatrix()
     m_magnitudeBuffer(new float[NUM_BANDS]()),
     m_pcm(new float[AUDIO_BUFFER]())
 {
-  m_settingsUseOwnshader = kodi::GetSettingBoolean("ownshader");
-  if (m_settingsUseOwnshader)
-    m_currentPreset = -1;
-  else
-    m_currentPreset = kodi::GetSettingInt("lastpresetidx");
+  m_currentPreset = kodi::GetSettingInt("lastpresetidx");
+  m_dotSize = static_cast< float > (kodi::GetSettingInt("dotsize"));
 }
 
 CVisualizationMatrix::~CVisualizationMatrix()
@@ -400,6 +399,7 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     glUniform3f(m_attrResolutionLoc, w, h, 0.0f);
     glUniform1f(m_attrGlobalTimeLoc, t);
     glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
+    glUniform1f(m_attrDotSizeLoc, m_dotSize);
     glUniform1fv(m_attrChannelTimeLoc, 4, tv);
     glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
@@ -605,6 +605,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   m_attrChannelLoc[1] = glGetUniformLocation(matrixShader, "iChannel1");
   m_attrChannelLoc[2] = glGetUniformLocation(matrixShader, "iChannel2");
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
+  m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");
 
   m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");

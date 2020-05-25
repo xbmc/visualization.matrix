@@ -74,6 +74,7 @@ private:
   int64_t m_initialTime = 0; // in ms
   int m_bitsPrecision = 0;
   int m_currentPreset = 0;
+  float m_dotSize = 0.0;
 
   int m_samplesPerSec = 0; // Given by Start(...)
   bool m_needsUpload = true; // Set by AudioData(...) to mark presence of data
@@ -87,6 +88,7 @@ private:
   GLint m_attrChannelResolutionLoc = 0;
   GLint m_attrChannelLoc[4] = {0};
   GLuint m_channelTextures[4] = {0};
+  GLint m_attrDotSizeLoc = 0;
 
   kodi::gui::gl::CShaderProgram m_matrixShader;
   kodi::gui::gl::CShaderProgram m_displayShader;

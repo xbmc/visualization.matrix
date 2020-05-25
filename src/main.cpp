@@ -53,6 +53,7 @@
 struct Preset
 {
   std::string name;
+  uint32_t labelId;
   std::string file;
   int channel[4];
 };
@@ -61,10 +62,10 @@ struct Preset
 //       as they can cause problems on weaker systems.
 const std::vector<Preset> g_presets =
 {
-   {"Kodi",                                     "kodi.frag.glsl",                   99,  0,  1, -1},
-   {"Album",                                    "album.frag.glsl",                  99,  0,  1,  2},
-   {"No Logo",                                  "nologo.frag.glsl",                 99,  0,  1,  2},
-   {"Clean",                                    "clean.frag.glsl",                  99,  0,  1,  2},
+   {"Kodi",    30100, "kodi.frag.glsl",   99,  0,  1, -1},
+   {"Album",   30101, "album.frag.glsl",  99,  0,  1,  2},
+   {"No Logo", 30102, "nologo.frag.glsl", 99,  0,  1,  2},
+   {"Clean",   30103, "clean.frag.glsl",  99,  0,  1,  2},
 };
 
 const std::vector<std::string> g_fileTextures =
@@ -315,8 +316,12 @@ bool CVisualizationMatrix::RandomPreset()
 //-----------------------------------------------------------------------------
 bool CVisualizationMatrix::GetPresets(std::vector<std::string>& presets)
 {
+  std::string name;
   for (auto preset : g_presets)
-    presets.push_back(preset.name);
+  {
+    name = kodi::GetLocalizedString(preset.labelId, preset.name);
+    presets.push_back(name);
+  }
   return true;
 }
 

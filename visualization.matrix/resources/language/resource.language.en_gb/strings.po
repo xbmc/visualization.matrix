@@ -27,3 +27,19 @@ msgstr ""
 msgctxt "#30002"
 msgid "Size of a \"Pixel\" which forms the rain."
 msgstr ""
+
+msgctxt "#30100"
+msgid "Kodi"
+msgstr ""
+
+msgctxt "#30101"
+msgid "Album"
+msgstr ""
+
+msgctxt "#30102"
+msgid "No Logo"
+msgstr ""
+
+msgctxt "#30103"
+msgid "Clean"
+msgstr ""

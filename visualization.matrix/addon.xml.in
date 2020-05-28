@@ -13,7 +13,7 @@
     <description lang="en">This music visualization is inspired by the movie "Matrix". It features four presets.</description>
     <platform>@PLATFORM@</platform>
     <assets>
-      <icon>resources/icon.png</icon>
+      <icon>resources/icon.jpg</icon>
       <fanart>resources/fanart.jpg</fanart>
     </assets>
   </extension>

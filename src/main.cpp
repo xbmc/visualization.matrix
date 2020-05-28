@@ -627,6 +627,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   m_initialTime = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0);
+  m_initialTime += (m_initialTime % 100000);
 }
 
 void CVisualizationMatrix::UnloadPreset()

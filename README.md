@@ -2,19 +2,11 @@
 
 This is a [Kodi](https://kodi.tv) visualization addon.
 
-[![Build Status](https://travis-ci.org/xbmc/visualization.matrix.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.matrix/branches)
+<!---[![Build Status](https://travis-ci.org/xbmc/visualization.matrix.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.matrix/branches)
 [![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.matrix?branchName=Matrix)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=34&branchName=Matrix)
 <!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.matrix?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-matrix?branch=Matrix) -->
 
-![screenshot](https://raw.githubusercontent.com/xbmc/visualization.matrix/Matrix/visualization.matrix/resources/screenshot-01.jpg)
-
-## Build instructions
-
-When building the addon you have to use the correct branch depending on which version of Kodi you're building against. 
-If you want to build the addon to be compatible with the latest kodi `master` commit, you need to checkout the branch with the current kodi codename.
-Also make sure you follow this README from the branch in question.
-
-### Linux
+### Build instructions for Linux
 
 The following instructions assume you will have built Kodi already in the `kodi-build` directory 
 suggested by the README.

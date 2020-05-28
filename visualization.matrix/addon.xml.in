@@ -9,19 +9,12 @@
     point="xbmc.player.musicviz"
     library_@PLATFORM@="@LIBRARY_FILENAME@"/>
   <extension point="xbmc.addon.metadata">
-    <summary lang="en">Visualizations from Matrix</summary>
-    <description lang="en">This music visualization is based on Matrix based GPU programs.</description>
+    <summary lang="en">Matrix inspired visualization for Kodi.</summary>
+    <description lang="en">This music visualization is inspired by the movie "Matrix". It features four presets.</description>
     <platform>@PLATFORM@</platform>
     <assets>
       <icon>resources/icon.png</icon>
       <fanart>resources/fanart.jpg</fanart>
-      <screenshot>resources/screenshot-01.jpg</screenshot>
-      <screenshot>resources/fanart.jpg</screenshot>
-      <screenshot>resources/screenshot-02.jpg</screenshot>
-      <screenshot>resources/screenshot-03.jpg</screenshot>
-      <screenshot>resources/screenshot-04.jpg</screenshot>
-      <screenshot>resources/screenshot-05.jpg</screenshot>
-      <screenshot>resources/screenshot-06.jpg</screenshot>
     </assets>
   </extension>
 </addon>

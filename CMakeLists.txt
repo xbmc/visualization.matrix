@@ -30,12 +30,6 @@ if(CORE_SYSTEM_NAME STREQUAL osx OR
   list(APPEND DEPLIBS "-framework CoreVideo")
 endif()
 
-set(MATRIX_SOURCES src/lodepng.cpp
-                      src/main.cpp)
-
-set(MATRIX_HEADERS src/lodepng.h
-                      src/main.h)
-
 list(APPEND DEPLIBS kissfft)
 
 build_addon(visualization.matrix MATRIX DEPLIBS)

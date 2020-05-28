@@ -67,12 +67,24 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     //float textureDisto
     float tick = floor(iTime*.1);
     float tock = fract(iTime*.1)*4.5;
-    vec2 textureCenter = vec2(fract(tick*1234.4321),fract(tick*5678.8765));
+    vec2 textureCenter = vec2(fract(tick*1234.4321),fract(tick*5678.8765))-.5;
+    textureCenter.x *= iResolution.x/iResolution.y;
     //textureCenter = vec2(fract(iTime*.5),fract(iTime*.25))-1.;
     //textureCenter.x = textureCenter.x * 3.0;
     //textureCenter.y *= 3.0;
     //float tex = texture(iChannel3, textureCenter + 4.3*(uv+.5-vec2(distort*DISTORTFACTORX,distort*DISTORTFACTORY))).x;
-    vec3 album = texture(iChannel3, ((uv)*2. + textureCenter*2.)-vec2(distort*DISTORTFACTORX,distort*DISTORTFACTORY)*2.).rgb;
+    //vec2 albumcoords = (uv*2. + vec2(iResolution.x/iResolution.y,-0.25));
+    vec2 albumcoords = (fragCoord*2.)/iResolution.y;
+    //albumcoords += vec2(-2.*iResolution.x/iResolution.y+1.,-1.);
+    albumcoords += vec2(-2.*iResolution.x/iResolution.y+1.,-1.)*vec2(fract(tick*1234.4321),fract(tick*5678.8765));
+    albumcoords -= distort*vec2(DISTORTFACTORX,DISTORTFACTORY);
+    
+    vec3 album = texture(iChannel3, albumcoords).rgb;
+    //thanks GLES 2.0 for not having clamping to border
+    album *= step(0.,albumcoords).x - step(1.,albumcoords).x;
+    album *= step(0.,albumcoords).y - step(1.,albumcoords).y;
+    //album *= 1. - step(1.,albumcoords).y;
+    //vec3 album = texture(iChannel3, ((uv)*2. + textureCenter*2.)-vec2(distort*DISTORTFACTORX,distort*DISTORTFACTORY)*2.).rgb;
     float tex = max(album.r * sin(tock),0.) + max(album.g * sin(tock - 1.),0.) + max(album.b * sin(tock - 2.0),0.) *.25;
     //float tex = texture(iChannel1, uv+.5-vec2(distort,distort)).x;
     //float tex = texture(iChannel1, uv+.5).x;

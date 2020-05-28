@@ -1,11 +1,19 @@
-# visualization.matrix addon for Kodi
+# Matrix themed visualization addon for Kodi (visualization.matrix)
+
+![icon](visualization.matrix/resources/icon.jpg)
 
 This is a [Kodi](https://kodi.tv) visualization addon.
 
-<!---[![Build Status](https://travis-ci.org/xbmc/visualization.matrix.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.matrix/branches)
+<!--[![Build Status](https://travis-ci.org/xbmc/visualization.matrix.svg?branch=Matrix)](https://travis-ci.org/xbmc/visualization.matrix/branches)
 [![Build Status](https://dev.azure.com/teamkodi/binary-addons/_apis/build/status/xbmc.visualization.matrix?branchName=Matrix)](https://dev.azure.com/teamkodi/binary-addons/_build/latest?definitionId=34&branchName=Matrix)
-<!--- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.matrix?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-matrix?branch=Matrix) -->
+<!-- [![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.matrix?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-matrix?branch=Matrix) -->
 
+### Screenshot
+
+
+![fanart](visualization.matrix/resources/fanart.jpg)
+
+<!--
 ### Build instructions for Linux
 
 The following instructions assume you will have built Kodi already in the `kodi-build` directory 
@@ -19,3 +27,4 @@ suggested by the README.
 
 The addon files will be placed in `../../xbmc/kodi-build/addons` so if you build Kodi from source and run it directly 
 the addon will be available as a system addon.
+-->

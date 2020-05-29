@@ -10,7 +10,7 @@
     library_@PLATFORM@="@LIBRARY_FILENAME@"/>
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Matrix inspired visualization for Kodi.</summary>
-    <description lang="en">This music visualization is inspired by the movie "Matrix". It features four presets.</description>
+    <description lang="en">This music visualization is inspired by the movie "Matrix". It features six presets.</description>
     <platform>@PLATFORM@</platform>
     <assets>
       <icon>resources/icon.jpg</icon>

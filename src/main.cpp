@@ -62,10 +62,12 @@ struct Preset
 //       as they can cause problems on weaker systems.
 const std::vector<Preset> g_presets =
 {
-   {"Kodi",    30100, "kodi.frag.glsl",   99,  0,  1, -1},
-   {"Album",   30101, "album.frag.glsl",  99,  0,  1,  2},
-   {"No Logo", 30102, "nologo.frag.glsl", 99,  0,  1,  2},
-   {"Clean",   30103, "clean.frag.glsl",  99,  0,  1,  2},
+   {"Kodi",                30100, "kodi.frag.glsl",     99,  0,  1, -1},
+   {"Album",               30101, "album.frag.glsl",    99,  0,  1,  2},
+   {"Rain only",           30102, "nologo.frag.glsl",   99,  0,  1,  2},
+   {"Rain with waveform",  30103, "nologowf.frag.glsl", 99,  0,  1,  2},
+   {"Clean",               30104, "clean.frag.glsl",    99,  0,  1,  2},
+   {"Clean with waveform", 30105, "cleanwf.frag.glsl",  99,  0,  1,  2},
 };
 
 const std::vector<std::string> g_fileTextures =

@@ -37,9 +37,17 @@ msgid "Album"
 msgstr ""
 
 msgctxt "#30102"
-msgid "No Logo"
+msgid "Rain only"
 msgstr ""
 
 msgctxt "#30103"
-msgid "Clean"
+msgid "Rain with waveform"
+msgstr ""
+
+msgctxt "#30104"
+msgid "Clean rain"
+msgstr ""
+
+msgctxt "#30105"
+msgid "Clean rain with waveform"
 msgstr ""

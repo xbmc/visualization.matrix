@@ -63,6 +63,7 @@ private:
   void SmoothingOverTime(float* outputBuffer, float* lastOutputBuffer, kiss_fft_cpx* inputBuffer, size_t length, float smoothingTimeConstant, unsigned int fftSize);
   float LinearToDecibels(float linear);
   int DetermineBitsPrecision();
+  bool UpdateAlbumart();
   //double MeasurePerformance(const std::string& shaderPath, int size);
 
   kiss_fft_cfg m_kissCfg;
@@ -78,6 +79,8 @@ private:
 
   int m_samplesPerSec = 0; // Given by Start(...)
   bool m_needsUpload = true; // Set by AudioData(...) to mark presence of data
+
+  std::string m_albumArt = "";
 
   GLint m_attrResolutionLoc = 0;
   GLint m_attrGlobalTimeLoc = 0;

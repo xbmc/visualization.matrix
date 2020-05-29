@@ -285,6 +285,7 @@ bool CVisualizationMatrix::NextPreset()
 {
   m_currentPreset = (m_currentPreset + 1) % g_presets.size();
   Launch(m_currentPreset);
+  UpdateAlbumart();
   kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
@@ -293,6 +294,7 @@ bool CVisualizationMatrix::PrevPreset()
 {
   m_currentPreset = (m_currentPreset - 1) % g_presets.size();
   Launch(m_currentPreset);
+  UpdateAlbumart();
   kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
@@ -301,6 +303,7 @@ bool CVisualizationMatrix::LoadPreset(int select)
 {
   m_currentPreset = select % g_presets.size();
   Launch(m_currentPreset);
+  UpdateAlbumart();
   kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
@@ -309,6 +312,7 @@ bool CVisualizationMatrix::RandomPreset()
 {
   m_currentPreset = (int)((std::rand() / (float)RAND_MAX) * g_presets.size());
   Launch(m_currentPreset);
+  UpdateAlbumart();
   kodi::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
@@ -335,8 +339,14 @@ int CVisualizationMatrix::GetActivePreset()
   return m_currentPreset;
 }
 
+bool CVisualizationMatrix::UpdateAlbumart()
+{
+  return CVisualizationMatrix::UpdateAlbumart(m_albumArt);
+}
+
 bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
 {
+  m_albumArt = albumart;
   std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
   thumb = thumb.substr(0,8);
   std::string special = std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();

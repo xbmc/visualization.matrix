@@ -28,3 +28,8 @@ suggested by the README.
 The addon files will be placed in `../../xbmc/kodi-build/addons` so if you build Kodi from source and run it directly 
 the addon will be available as a system addon.
 -->
+
+### Issues to correct
+- Test on platform other than x64 Linux
+- Clean up shader code
+- Make variables definable via settings

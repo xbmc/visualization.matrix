@@ -362,7 +362,7 @@ bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
     return true;
   }
 
-  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/logo.png"), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/textures/logo.png"), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
   
   return false;
 }

@@ -65,9 +65,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     //KODI texture
     //float textureDisto
-    float tick = floor(iTime*.1);
     float tock = fract(iTime*.1)*4.5;
-    vec2 textureCenter = vec2(fract(tick*1234.4321),fract(tick*5678.8765))-.5;
+    float tick = floor(iTime*.1)*tock*vec2(30.,70.);
+    albumcoords += vec2(-2.*iResolution.x/iResolution.y+1.,-1.)*vec2(fract(tick*.4321),fract(tick*.3765));
     textureCenter.x *= iResolution.x/iResolution.y;
     //textureCenter = vec2(fract(iTime*.5),fract(iTime*.25))-1.;
     //textureCenter.x = textureCenter.x * 3.0;

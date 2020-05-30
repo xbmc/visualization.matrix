@@ -84,7 +84,7 @@ R"shader(#version 150
 
 #extension GL_OES_standard_derivatives : enable
 
-uniform vec3 iResolution;
+uniform vec2 iResolution;
 uniform float iGlobalTime;
 uniform float iDotSize;
 //uniform float iChannelTime[4];
@@ -127,7 +127,7 @@ R"shader(#version 100
 precision mediump float;
 precision mediump int;
 
-uniform vec3 iResolution;
+uniform vec2 iResolution;
 uniform float iGlobalTime;
 uniform float iDotSize;
 //uniform float iChannelTime[4];
@@ -404,7 +404,7 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     float t = intt / 1000.0f;
     //GLfloat tv[] = { t, t, t, t };
 
-    glUniform3f(m_attrResolutionLoc, w, h, 0.0f);
+    glUniform2f(m_attrResolutionLoc, w, h);
     glUniform1f(m_attrGlobalTimeLoc, t);
     //glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
     glUniform1f(m_attrDotSizeLoc, m_dotSize);

@@ -64,11 +64,11 @@ struct Preset
 const std::vector<Preset> g_presets =
 {
    {"Kodi",                30100, "kodi.frag.glsl",     99,  0,  1, -1},
-   {"Album",               30101, "album.frag.glsl",    99,  0,  1,  2},
-   {"Rain only",           30102, "nologo.frag.glsl",   99,  0,  1,  2},
-   {"Rain with waveform",  30103, "nologowf.frag.glsl", 99,  0,  1,  2},
-   {"Clean",               30104, "clean.frag.glsl",    99,  0,  1,  2},
-   {"Clean with waveform", 30105, "cleanwf.frag.glsl",  99,  0,  1,  2},
+   {"Album",               30101, "album.frag.glsl",    99, -1,  1,  2},
+   {"Rain only",           30102, "nologo.frag.glsl",   99, -1,  1, -1},
+   {"Rain with waveform",  30103, "nologowf.frag.glsl", 99, -1,  1, -1},
+   {"Clean",               30104, "clean.frag.glsl",    99, -1, -1, -1},
+   {"Clean with waveform", 30105, "cleanwf.frag.glsl",  99, -1, -1, -1},
 };
 
 const std::vector<std::string> g_fileTextures =
@@ -87,11 +87,11 @@ R"shader(#version 150
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 uniform float iDotSize;
-uniform float iChannelTime[4];
-uniform vec4 iMouse;
-uniform vec4 iDate;
-uniform float iSampleRate;
-uniform vec3 iChannelResolution[4];
+//uniform float iChannelTime[4];
+//uniform vec4 iMouse;
+//uniform vec4 iDate;
+//uniform float iSampleRate;
+//uniform vec3 iChannelResolution[4];
 uniform sampler2D iChannel0;
 uniform sampler2D iChannel1;
 uniform sampler2D iChannel2;
@@ -130,11 +130,11 @@ precision mediump int;
 uniform vec3 iResolution;
 uniform float iGlobalTime;
 uniform float iDotSize;
-uniform float iChannelTime[4];
-uniform vec4 iMouse;
-uniform vec4 iDate;
-uniform float iSampleRate;
-uniform vec3 iChannelResolution[4];
+//uniform float iChannelTime[4];
+//uniform vec4 iMouse;
+//uniform vec4 iDate;
+//uniform float iSampleRate;
+//uniform vec3 iChannelResolution[4];
 uniform sampler2D iChannel0;
 uniform sampler2D iChannel1;
 uniform sampler2D iChannel2;
@@ -347,6 +347,11 @@ bool CVisualizationMatrix::UpdateAlbumart()
 
 bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
 {
+  if (g_presets[m_currentPreset].channel[3] != 2)
+  {
+    return false;
+  }
+
   m_albumArt = albumart;
   std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
   thumb = thumb.substr(0,8);
@@ -397,15 +402,16 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     }
 
     float t = intt / 1000.0f;
-    GLfloat tv[] = { t, t, t, t };
+    //GLfloat tv[] = { t, t, t, t };
 
     glUniform3f(m_attrResolutionLoc, w, h, 0.0f);
     glUniform1f(m_attrGlobalTimeLoc, t);
-    glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
+    //glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
     glUniform1f(m_attrDotSizeLoc, m_dotSize);
-    glUniform1fv(m_attrChannelTimeLoc, 4, tv);
+    //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
     glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
+    /*
     time_t now = time(NULL);
     tm *ltm = localtime(&now);
 
@@ -414,7 +420,8 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     float day = ltm->tm_mday;
     float sec = (ltm->tm_hour * 60 * 60) + (ltm->tm_min * 60) + ltm->tm_sec;
 
-    glUniform4f(m_attrDateLoc, year, month, day, sec);
+    //glUniform4f(m_attrDateLoc, year, month, day, sec);
+    */
 
     for (int i = 0; i < 4; i++)
     {
@@ -597,18 +604,18 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   GLuint matrixShader = m_matrixShader.ProgramHandle();
 
-  m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");
+  m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
   m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iGlobalTime");
-  m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
-  m_attrMouseLoc = glGetUniformLocation(matrixShader, "iMouse");
-  m_attrDateLoc = glGetUniformLocation(matrixShader, "iDate");
-  m_attrSampleRateLoc  = glGetUniformLocation(matrixShader, "iSampleRate");
-  m_attrChannelResolutionLoc = glGetUniformLocation(matrixShader, "iChannelResolution");
+  //m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
+  //m_attrMouseLoc = glGetUniformLocation(matrixShader, "iMouse");
+  //m_attrDateLoc = glGetUniformLocation(matrixShader, "iDate");
+  //m_attrSampleRateLoc  = glGetUniformLocation(matrixShader, "iSampleRate");
+  //m_attrChannelResolutionLoc = glGetUniformLocation(matrixShader, "iChannelResolution");
   m_attrChannelLoc[0] = glGetUniformLocation(matrixShader, "iChannel0");
   m_attrChannelLoc[1] = glGetUniformLocation(matrixShader, "iChannel1");
   m_attrChannelLoc[2] = glGetUniformLocation(matrixShader, "iChannel2");
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
-  m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");
+  m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");//TODO: move to define
 
   m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");

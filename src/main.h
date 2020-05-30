@@ -84,11 +84,11 @@ private:
 
   GLint m_attrResolutionLoc = 0;
   GLint m_attrGlobalTimeLoc = 0;
-  GLint m_attrChannelTimeLoc = 0;
-  GLint m_attrMouseLoc = 0;
-  GLint m_attrDateLoc = 0;
-  GLint m_attrSampleRateLoc = 0;
-  GLint m_attrChannelResolutionLoc = 0;
+  //GLint m_attrChannelTimeLoc = 0;
+  //GLint m_attrMouseLoc = 0;
+  //GLint m_attrDateLoc = 0;
+  //GLint m_attrSampleRateLoc = 0;
+  //GLint m_attrChannelResolutionLoc = 0;
   GLint m_attrChannelLoc[4] = {0};
   GLuint m_channelTextures[4] = {0};
   GLint m_attrDotSizeLoc = 0;

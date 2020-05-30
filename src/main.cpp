@@ -30,6 +30,7 @@
 #include "stb_image.h"
 #include "kodi/Filesystem.h"
 #include "kodi/libXBMC_addon.h"
+#include <kodi/General.h>
 
 
 
@@ -498,7 +499,7 @@ void CVisualizationMatrix::Launch(int preset)
   m_usedShaderFile = kodi::GetAddonPath("resources/shaders/" + g_presets[preset].file);
   for (int i = 0; i < 4; i++)
   {
-    if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < g_fileTextures.size())
+    if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < static_cast< int > (g_fileTextures.size()))
     {
       m_shaderTextures[i].texture = kodi::GetAddonPath("resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
     }

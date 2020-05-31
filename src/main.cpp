@@ -207,6 +207,7 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
 {
   kodi::Log(ADDON_LOG_DEBUG, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
 
+  //background vertex
   static const GLfloat vertex_data[] =
   {
     -1.0, 1.0, 1.0, 1.0,
@@ -218,6 +219,20 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
   // Upload vertex data to a buffer
   glGenBuffers(1, &m_state.vertex_buffer);
   glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+
+  //logo vertex
+  static const GLfloat vertex_data_logo[] =
+  {
+    -0.5, 0.5, 0.5, 0.0,
+     0.5, 0.5, 0.5, 0.5,
+     0.5,-0.5, 0.5, 0.5,
+    -0.5,-0.5, 0.5, 0.5,
+  };
+
+  // Upload vertex data to a buffer
+  glGenBuffers(1, &m_state.vertex_buffer_logo);
+  glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer_logo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
   m_samplesPerSec = iSamplesPerSec;
@@ -236,6 +251,7 @@ void CVisualizationMatrix::Stop()
   UnloadTextures();
 
   glDeleteBuffers(1, &m_state.vertex_buffer);
+  glDeleteBuffers(1, &m_state.vertex_buffer_logo);
 }
 
 

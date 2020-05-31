@@ -205,7 +205,7 @@ void CVisualizationMatrix::Render()
 
 bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
-  kodi::Log(ADDON_LOG_INFO, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
+  kodi::Log(ADDON_LOG_DEBUG, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
 
   static const GLfloat vertex_data[] =
   {
@@ -230,7 +230,7 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
 void CVisualizationMatrix::Stop()
 {
   m_initialized = false;
-  kodi::Log(ADDON_LOG_INFO, "Stop");
+  kodi::Log(ADDON_LOG_DEBUG, "Stop");
 
   UnloadPreset();
   UnloadTextures();
@@ -493,7 +493,7 @@ void CVisualizationMatrix::Launch(int preset)
   // mali-400 has only 10 bits which means milliseond timer wraps after ~1 second.
   // we'll fudge that up a bit as having a larger range is more important than ms accuracy
   m_bitsPrecision = std::max(m_bitsPrecision, 13);
-  kodi::Log(ADDON_LOG_INFO, "bits of precision: %d", m_bitsPrecision);
+  kodi::Log(ADDON_LOG_DEBUG, "bits of precision: %d", m_bitsPrecision);
 
   UnloadTextures();
 
@@ -695,7 +695,7 @@ GLuint CVisualizationMatrix::CreateTexture(const GLvoid* data, GLint format, uns
 
 GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint internalFormat, GLint scaling, GLint repeat)
 {
-  kodi::Log(ADDON_LOG_INFO, "creating texture %s\n", file.c_str());
+  kodi::Log(ADDON_LOG_DEBUG, "creating texture %s\n", file.c_str());
 
   /*
   unsigned error;

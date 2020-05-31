@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="visualization.matrix"
-  version="0.0.1"
+  version="0.0.3"
   name="Matrix"
-  provider-name="Team Kodi">
+  provider-name="Sarbes">
   <requires>@ADDON_DEPENDS@</requires>
   <extension
     point="xbmc.player.musicviz"

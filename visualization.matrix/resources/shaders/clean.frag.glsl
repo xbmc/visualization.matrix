@@ -1,8 +1,6 @@
 #define DOTSIZE 4.
-#define RNDSEED1 170.12
-#define RNDSEED2 7572.1
-#define FALLSPEED 4. //depends on height - I think
-#define PIXELSHIFT iTime * .0001
+const float cFallspeed = .25;
+
 
 #define INTENSITY 1.0
 #define MININTENSITY 0.075
@@ -32,6 +30,11 @@
 //precision highp float;
 precision mediump float;
 
+float h11(float p)
+{
+    return fract(pow(fract(p * .1031) * (p + 33.33),2.));
+}
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     //general stuff
@@ -39,13 +42,13 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     //shifts the whole coord system to avoid burn-in
     vec2 shift = floor(abs(mod((vec2(iTime*.01,iTime*.003)), DOTSIZE*2.)-DOTSIZE));
     uv += shift/iResolution.y;
-    highp float columns = floor(iResolution.y/DOTSIZE);
+    mediump float columns = floor(iResolution.y/DOTSIZE);
     
     
     //rain
-    highp vec2 gv = floor(uv*columns);
-    highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2);
-    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd));
+    mediump vec2 gv = floor(uv*columns);
+    mediump float rnd = h11(gv.x) + 0.1;
+    mediump float bw = 1. -(fract((gv.y*.0024)+(time+20.)*cFallspeed*rnd));
     
     bw *= .025;
     
@@ -69,7 +72,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     float basecolor = smoothstep(.85,.00,d)*bw;
 
     vec3 col = vec3(peakcolor+basecolor*RED,peakcolor+basecolor*GREEN,peakcolor+basecolor*BLUE);
-    col *= INTENSITY;
+    col *= INTENSITY *8.;
     
     fragColor = vec4(col,1.0);
 }

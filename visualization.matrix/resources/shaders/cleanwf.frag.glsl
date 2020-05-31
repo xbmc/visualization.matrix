@@ -34,10 +34,8 @@ precision mediump float;
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-	float zoom = abs(sin(iTime*.25));
-	zoom = 1.;
     //general stuff
-    vec2 uv = (fragCoord-0.5*iResolution.xy)/iResolution.y*zoom;
+    vec2 uv = (fragCoord-0.5*iResolution.xy)/iResolution.y;
     //shifts the whole coord system to avoid burn-in
     vec2 shift = floor(abs(mod((vec2(iTime*.01,iTime*.003)), DOTSIZE*2.)-DOTSIZE));
     uv += shift/iResolution.y;
@@ -48,7 +46,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     highp vec2 gv = floor(uv*columns);
     //highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2)+distort*.14;
     highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2);
-    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd)*1.);
+    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd));
     
     bw *= .025;
     
@@ -63,16 +61,14 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
     bw = min(bw,1.99);
     
-    float wave   = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.25 + .25;
-    //float wave2  = smoothstep(0.0,.0000001, wave + uv.y - 0.5);
-    float wave2  = wave + uv.y;
-    wave2 = smoothstep(.45,.5,wave2);
-    wave2 = min(1.,wave2);
-    wave2 = .5 - abs(wave2 -.5) ;
+    float wave   = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.25 + .25 + uv.y;
+    wave = smoothstep(.45,.5,wave);
+    wave = min(1.,wave);
+    wave = .5 - abs(wave -.5) ;
     //wave2 -= smoothstep(.55,.5,wave2);
     //wave2        -= smoothstep(0.0,(6.0/iResolution.y), wave + uv.y - 0.505);
     
-    bw += wave2*.13;
+    bw += wave*.13;
 
 
     //pseudo pixels (dots)
@@ -82,10 +78,6 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     vec3 col = vec3(peakcolor+basecolor*RED,peakcolor+basecolor*GREEN,peakcolor+basecolor*BLUE);
     col *= INTENSITY;
-    vec3 tmp4 = col;
     
-
-    //col.r = wave2;
-    //col.gb = uv;
     fragColor = vec4(col,1.0);
 }

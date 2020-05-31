@@ -34,10 +34,8 @@ precision mediump float;
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-	float zoom = abs(sin(iTime*.25));
-	zoom = 1.;
     //general stuff
-    vec2 uv = (fragCoord-0.5*iResolution.xy)/iResolution.y*zoom;
+    vec2 uv = (fragCoord-0.5*iResolution.xy)/iResolution.y;
     //shifts the whole coord system to avoid burn-in
     vec2 shift = floor(abs(mod((vec2(iTime*.01,iTime*.003)), DOTSIZE*2.)-DOTSIZE));
     uv += shift/iResolution.y;
@@ -46,9 +44,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
     //rain
     highp vec2 gv = floor(uv*columns);
-    //highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2)+distort*.14;
     highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2);
-    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd)*1.);
+    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd));
     
     bw *= .025;
     
@@ -66,14 +63,13 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
 
     //pseudo pixels (dots)
-    float d = length(fract(uv*columns)-.5);
+    //float d = length(fract(uv*columns)-.5);
+    float d = length(fract(uv*columns));
     float peakcolor = smoothstep(.35,.00,d)*bw;
     float basecolor = smoothstep(.85,.00,d)*bw;
 
     vec3 col = vec3(peakcolor+basecolor*RED,peakcolor+basecolor*GREEN,peakcolor+basecolor*BLUE);
     col *= INTENSITY;
-    vec3 tmp4 = col;
-    
     
     fragColor = vec4(col,1.0);
 }

@@ -205,9 +205,7 @@ void CVisualizationMatrix::Render()
 
 bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
 {
-#ifdef DEBUG_PRINT
-  printf("Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
-#endif
+  kodi::Log(ADDON_LOG_INFO, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
 
   static const GLfloat vertex_data[] =
   {
@@ -232,9 +230,7 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
 void CVisualizationMatrix::Stop()
 {
   m_initialized = false;
-#ifdef DEBUG_PRINT
-  printf("Stop\n");
-#endif
+  kodi::Log(ADDON_LOG_INFO, "Stop");
 
   UnloadPreset();
   UnloadTextures();
@@ -497,9 +493,7 @@ void CVisualizationMatrix::Launch(int preset)
   // mali-400 has only 10 bits which means milliseond timer wraps after ~1 second.
   // we'll fudge that up a bit as having a larger range is more important than ms accuracy
   m_bitsPrecision = std::max(m_bitsPrecision, 13);
-#ifdef DEBUG_PRINT
-  printf("bits=%d\n", m_bitsPrecision);
-#endif
+  kodi::Log(ADDON_LOG_INFO, "bits of precision: %d", m_bitsPrecision);
 
   UnloadTextures();
 
@@ -598,7 +592,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   if (!m_matrixShader.LoadShaderFiles(vertMatrixShader, shaderPath) ||
       !m_matrixShader.CompileAndLink("", "", fsHeader, fsFooter))
   {
-    kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current matrix file '%s')", shaderPath.c_str());
+    kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current file '%s')", shaderPath.c_str());
     return;
   }
 
@@ -701,9 +695,7 @@ GLuint CVisualizationMatrix::CreateTexture(const GLvoid* data, GLint format, uns
 
 GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint internalFormat, GLint scaling, GLint repeat)
 {
-#ifdef DEBUG_PRINT
-  printf("creating texture %s\n", file.c_str());
-#endif
+  kodi::Log(ADDON_LOG_INFO, "creating texture %s\n", file.c_str());
 
   /*
   unsigned error;
@@ -728,10 +720,7 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   {
     kodi::Log(ADDON_LOG_ERROR, "couldn't load image");
     return 0;
-  }
-  printf("####\n");
-  printf("w=%i,h=%i,n=%i\n",width,height,n);
-  
+  }  
 
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   stbi_image_free(image);

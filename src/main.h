@@ -64,6 +64,7 @@ private:
   float LinearToDecibels(float linear);
   int DetermineBitsPrecision();
   bool UpdateAlbumart();
+  void GatherDefines();
   //double MeasurePerformance(const std::string& shaderPath, int size);
 
   kiss_fft_cfg m_kissCfg;
@@ -81,6 +82,7 @@ private:
   bool m_needsUpload = true; // Set by AudioData(...) to mark presence of data
 
   std::string m_albumArt = "";
+  std::string m_defines = "";
 
   GLint m_attrResolutionLoc = 0;
   GLint m_attrGlobalTimeLoc = 0;

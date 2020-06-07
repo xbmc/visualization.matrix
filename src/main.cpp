@@ -84,9 +84,9 @@ R"shader(#version 150
 
 #extension GL_OES_standard_derivatives : enable
 
-uniform vec2 iResolution;
+//uniform vec2 iResolution;
 uniform float iGlobalTime;
-uniform float iDotSize;
+//uniform float iDotSize;
 //uniform float iChannelTime[4];
 //uniform vec4 iMouse;
 //uniform vec4 iDate;
@@ -127,9 +127,9 @@ R"shader(#version 100
 precision mediump float;
 precision mediump int;
 
-uniform vec2 iResolution;
+//uniform vec2 iResolution;
 uniform float iGlobalTime;
-uniform float iDotSize;
+//uniform float iDotSize;
 //uniform float iChannelTime[4];
 //uniform vec4 iMouse;
 //uniform vec4 iDate;
@@ -173,7 +173,7 @@ CVisualizationMatrix::CVisualizationMatrix()
     m_pcm(new float[AUDIO_BUFFER]())
 {
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
-  m_dotSize = static_cast< float > (kodi::GetSettingInt("dotsize"));
+  m_dotSize = kodi::GetSettingInt("dotsize");
 }
 
 CVisualizationMatrix::~CVisualizationMatrix()
@@ -417,10 +417,10 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     float t = intt / 1000.0f;
     //GLfloat tv[] = { t, t, t, t };
 
-    glUniform2f(m_attrResolutionLoc, w, h);
+    //glUniform2f(m_attrResolutionLoc, w, h);
     glUniform1f(m_attrGlobalTimeLoc, t);
     //glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
-    glUniform1f(m_attrDotSizeLoc, m_dotSize);
+    //glUniform1f(m_attrDotSizeLoc, m_dotSize);
     //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
     glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
@@ -605,9 +605,10 @@ void CVisualizationMatrix::UnloadTextures()
 void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 {
   UnloadPreset();
+  GatherDefines();
   std::string vertMatrixShader = kodi::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
   if (!m_matrixShader.LoadShaderFiles(vertMatrixShader, shaderPath) ||
-      !m_matrixShader.CompileAndLink("", "", fsHeader, fsFooter))
+      !m_matrixShader.CompileAndLink("", "", m_defines, fsFooter))
   {
     kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current file '%s')", shaderPath.c_str());
     return;
@@ -615,7 +616,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   GLuint matrixShader = m_matrixShader.ProgramHandle();
 
-  m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
+  //m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
   m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iGlobalTime");
   //m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
   //m_attrMouseLoc = glGetUniformLocation(matrixShader, "iMouse");
@@ -626,7 +627,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   m_attrChannelLoc[1] = glGetUniformLocation(matrixShader, "iChannel1");
   m_attrChannelLoc[2] = glGetUniformLocation(matrixShader, "iChannel2");
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
-  m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");//TODO: move to define
+  //m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");//TODO: move to define
 
   m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");
@@ -826,4 +827,28 @@ double CVisualizationMatrix::MeasurePerformance(const std::string& shaderPath, i
   return t;
 }
 */
+
+void CVisualizationMatrix::GatherDefines()
+{
+  m_defines = fsHeader;
+  m_defines += "\n";
+  m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
+  m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
+  m_defines += "const float cColumns = " + std::to_string(Width()/(static_cast<float>(m_dotSize)*2.0)) + ";\n";
+  m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";
+  
+  if (m_state.fbwidth && m_state.fbheight)
+  {
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";
+    m_defines += "const vec2 iResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";//TODO remove from shaders
+  }
+  else
+  {
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";
+    m_defines += "const vec2 iResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";//TODO remove from shaders
+  }
+
+
+  kodi::Log(ADDON_LOG_ERROR, m_defines.c_str());
+}
 ADDONCREATOR(CVisualizationMatrix) // Don't touch this!

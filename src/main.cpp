@@ -841,7 +841,7 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "out vec4 FragColor;\n";
 #else
   m_defines += "#define FragColor gl_FragColor\n";
-  m_defines += "#ifndef texture\n#define texture texture2D\n#endif";
+  m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n";
 #endif
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";

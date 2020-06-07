@@ -1,83 +1,54 @@
-#define DOTSIZE 4.
 #define RNDSEED1 170.12
 #define RNDSEED2 7572.1
-#define FALLSPEED 4. //depends on height - I think
-#define PIXELSHIFT iTime * .0001
 
 #define INTENSITY 1.0
 #define MININTENSITY 0.075
 
-#define DISTORTTHRESHOLD 0.4
-#define DISTORTFACTORX 0.6
-#define DISTORTFACTORY 0.4
+#define lowpower
 
-#define VIGNETTEINTENSITY 0.05
+#ifdef lowpower
+float h11(float p)
+{
+    return fract(fract(p * .1031) * (p + 33.33));
+}
+#else
+float h11(float p)
+{
+    return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
+}
+#endif
 
-//blueish
-#define RED .2
-#define GREEN .8
-#define BLUE 1.
-
-/*
-//greenish
-#define RED .1
-#define GREEN .99
-#define BLUE .40
-*/
-
-//TODO: remove:
-#define time iTime
-
-
-//precision highp float;
-precision mediump float;
-
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
+void main(void)
 {
     //general stuff
-    vec2 uv = (fragCoord-0.5*iResolution.xy)/iResolution.y;
-    //shifts the whole coord system to avoid burn-in
-    vec2 shift = floor(abs(mod((vec2(iTime*.01,iTime*.003)), DOTSIZE*2.)-DOTSIZE));
-    uv += shift/iResolution.y;
-    highp float columns = floor(iResolution.y/DOTSIZE);
-    
+    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.y;
     
     //rain
-    highp vec2 gv = floor(uv*columns);
-    //highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2)+distort*.14;
-    highp float rnd = fract(20.12345+sin(gv.x*RNDSEED1)*RNDSEED2);
-    highp float bw = 1.-(fract((gv.y*.01)/FALLSPEED+(time+20.)*0.25*rnd));
+    vec2 gv = floor(uv*cColumns);
+    float rnd = h11(gv.x) + 0.1;
+    float bw = .65 - fract((gv.y*.0024)+iTime*rnd);
     
-    bw *= .025;
-    
-    
-    //FFT stuff (visualization)
-    float fft = texture( iChannel0, vec2((1.-abs(uv.x))*.7,0.0) ).x;
-    fft *= (3.2 -abs(0.-uv.x*1.3))*0.75;
-    fft *= 1.8;
-    
-    bw=bw+bw*fft*0.4;
+    //FFT
+    float fft = texture(iChannel0, vec2((1.-abs(uv.x))*.7,0.0)).x;
+    fft -= abs(uv.x)*.25;
+
+    bw *= 1. + fft*0.4;
     bw += bw*clamp((pow(fft*1.3,2.)-12.),.0,.6);
     bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
     bw = min(bw,1.99);
     
-    float wave   = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.25 + .25 + uv.y;
-    wave = smoothstep(.45,.5,wave);
-    wave = min(1.,wave);
-    wave = .5 - abs(wave -.5) ;
-    //wave2 -= smoothstep(.55,.5,wave2);
-    //wave2        -= smoothstep(0.0,(6.0/iResolution.y), wave + uv.y - 0.505);
-    
-    bw += wave*.13;
-
+    //waveform
+    float wave = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.5 + uv.y;
+    bw -= abs(smoothstep(.225,.275,wave) -.5);
 
     //pseudo pixels (dots)
-    float d = length(fract(uv*columns)-.5);
+    float d = length(fract(uv*cColumns)-.5);
     float peakcolor = smoothstep(.35,.00,d)*bw;
     float basecolor = smoothstep(.85,.00,d)*bw;
-
-    vec3 col = vec3(peakcolor+basecolor*RED,peakcolor+basecolor*GREEN,peakcolor+basecolor*BLUE);
-    col *= INTENSITY;
     
-    fragColor = vec4(col,1.0);
+
+    //vec3 col = vec3(basecolor*RED+peakcolor,basecolor*GREEN+peakcolor,basecolor*BLUE+peakcolor);
+    vec3 col = basecolor*cColor+peakcolor;
+
+    FragColor = vec4(col,1.0);
 }

@@ -97,7 +97,7 @@ uniform float iGlobalTime;
 //uniform sampler2D iChannel2;
 //uniform sampler2D iChannel3;
 
-out vec4 FragColor;
+//out vec4 FragColor;
 
 #define iTime iGlobalTime
 
@@ -108,6 +108,7 @@ out vec4 FragColor;
 
 std::string fsFooter =
 R"shader(
+/*
 void main(void)
 {
   vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
@@ -115,6 +116,7 @@ void main(void)
   color.w = 1.0;
   FragColor = color;
 }
+*/
 )shader";
 
 #else
@@ -155,6 +157,7 @@ vec4 textureLod(sampler2D sampler, vec2 uv, float lod)
 
 std::string fsFooter =
 R"shader(
+/*
 void main(void)
 {
   vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
@@ -162,6 +165,7 @@ void main(void)
   color.w = 1.0;
   gl_FragColor = color;
 }
+*/
 )shader";
 
 #endif
@@ -832,6 +836,12 @@ void CVisualizationMatrix::GatherDefines()
 {
   m_defines = fsHeader;
   m_defines += "\n";
+#if defined(HAS_GL)
+  m_defines += "out vec4 FragColor;\n";
+#else
+  m_defines += "#define FragColor gl_FragColor\n";
+  m_defines += "#ifndef texture\n#define texture texture2D\n#endif";
+#endif
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(Width()/(static_cast<float>(m_dotSize)*2.0)) + ";\n";

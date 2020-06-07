@@ -193,8 +193,9 @@ void CVisualizationMatrix::Render()
   {
     if (m_state.fbwidth && m_state.fbheight)
     {
-      RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
-      RenderTo(m_displayShader.ProgramHandle(), 0);
+      RenderTo(m_matrixShader.ProgramHandle(), 0);
+      //RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
+      //RenderTo(m_displayShader.ProgramHandle(), 0);
     }
     else
     {

@@ -722,6 +722,7 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   kodi::Log(ADDON_LOG_DEBUG, "creating texture %s\n", file.c_str());
 
   
+  /*
   unsigned error;
   unsigned char* image;
   unsigned width, height;
@@ -737,20 +738,25 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   free(image);
   /**/
-  /*
   int width,height,n;
   //n = 1;
   unsigned char* image;
   stbi_set_flip_vertically_on_load(true);
-  image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
-
+  if (internalFormat == GL_RGBA)
+  {
+    image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
+  }
+  if (internalFormat == GL_RED)
+  {
+    image = stbi_load(file.c_str(), &height, &width, &n, STBI_grey);
+  }
   if (image == nullptr)
   {
     kodi::Log(ADDON_LOG_ERROR, "couldn't load image");
     return 0;
   }  
 
-  GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
+  GLuint texture = CreateTexture(image, internalFormat, width, height, internalFormat, scaling, repeat);
   stbi_image_free(image);
   image = nullptr;
   /**/

@@ -1,11 +1,6 @@
 #define RNDSEED1 170.12
 #define RNDSEED2 7572.1
 
-#define INTENSITY 1.0
-#define MININTENSITY 0.075
-
-#define lowpower
-
 #ifdef lowpower
 float h11(float p)
 {

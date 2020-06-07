@@ -92,10 +92,10 @@ uniform float iGlobalTime;
 //uniform vec4 iDate;
 //uniform float iSampleRate;
 //uniform vec3 iChannelResolution[4];
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
-uniform sampler2D iChannel2;
-uniform sampler2D iChannel3;
+//uniform sampler2D iChannel0;
+//uniform sampler2D iChannel1;
+//uniform sampler2D iChannel2;
+//uniform sampler2D iChannel3;
 
 out vec4 FragColor;
 
@@ -135,10 +135,10 @@ uniform float iGlobalTime;
 //uniform vec4 iDate;
 //uniform float iSampleRate;
 //uniform vec3 iChannelResolution[4];
-uniform sampler2D iChannel0;
-uniform sampler2D iChannel1;
-uniform sampler2D iChannel2;
-uniform sampler2D iChannel3;
+//uniform sampler2D iChannel0;
+//uniform sampler2D iChannel1;
+//uniform sampler2D iChannel2;
+//uniform sampler2D iChannel3;
 
 #define iTime iGlobalTime
 #ifndef texture
@@ -836,6 +836,21 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(Width()/(static_cast<float>(m_dotSize)*2.0)) + ";\n";
   m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";
+
+  m_defines += "uniform sampler2D iChannel0;\n";
+  if (g_presets[m_currentPreset].channel[1] != -1)
+  {
+    m_defines += "uniform sampler2D iChannel1;\n";
+  }
+  if (g_presets[m_currentPreset].channel[2] != -1)
+  {
+    m_defines += "uniform sampler2D iChannel2;\n";
+  }
+  if (g_presets[m_currentPreset].channel[3] != -1)
+  {
+    m_defines += "uniform sampler2D iChannel3;\n";
+  }
+
   
   if (m_state.fbwidth && m_state.fbheight)
   {

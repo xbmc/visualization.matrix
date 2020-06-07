@@ -721,7 +721,7 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
 {
   kodi::Log(ADDON_LOG_DEBUG, "creating texture %s\n", file.c_str());
 
-  /*
+  
   unsigned error;
   unsigned char* image;
   unsigned width, height;
@@ -732,8 +732,12 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
     kodi::Log(ADDON_LOG_ERROR, "lodepng_decode32_file error %u: %s", error, lodepng_error_text(error));
     return 0;
   }
-  */
 
+
+  GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
+  free(image);
+  /**/
+  /*
   int width,height,n;
   //n = 1;
   unsigned char* image;
@@ -749,9 +753,8 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   stbi_image_free(image);
   image = nullptr;
+  /**/
 
-  //GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
-  //free(image);
   return texture;
 }
 

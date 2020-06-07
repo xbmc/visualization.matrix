@@ -143,16 +143,17 @@ uniform float iGlobalTime;
 //uniform sampler2D iChannel3;
 
 #define iTime iGlobalTime
-#ifndef texture
-#define texture texture2D
-#endif
-
+//#ifndef texture
+//#define texture texture2D
+//#endif
+/*
 #ifndef textureLod
 vec4 textureLod(sampler2D sampler, vec2 uv, float lod)
 {
   return texture2D(sampler, uv, lod);
 }
 #endif
+*/
 )shader";
 
 std::string fsFooter =

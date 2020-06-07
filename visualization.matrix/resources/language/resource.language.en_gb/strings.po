@@ -28,6 +28,14 @@ msgctxt "#30002"
 msgid "Size of a \"Pixel\" which forms the rain."
 msgstr ""
 
+msgctxt "#30003"
+msgid "Rain fall speed"
+msgstr ""
+
+msgctxt "#30004"
+msgid "The speed how fast the rain is falling."
+msgstr ""
+
 msgctxt "#30100"
 msgid "Kodi"
 msgstr ""

@@ -77,6 +77,7 @@ private:
   int m_bitsPrecision = 0;
   int m_currentPreset = 0;
   float m_dotSize = 0.0;
+  float m_fallSpeed = 0.25;
 
   int m_samplesPerSec = 0; // Given by Start(...)
   bool m_needsUpload = true; // Set by AudioData(...) to mark presence of data

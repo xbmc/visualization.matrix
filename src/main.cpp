@@ -179,6 +179,7 @@ CVisualizationMatrix::CVisualizationMatrix()
 {
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
   m_dotSize = kodi::GetSettingInt("dotsize");
+  m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
 }
 
 CVisualizationMatrix::~CVisualizationMatrix()
@@ -401,7 +402,7 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     GLuint h = Height();
     if (m_state.fbwidth && m_state.fbheight)
       w = m_state.fbwidth, h = m_state.fbheight;
-    int64_t intt = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0) - m_initialTime;
+    int64_t intt = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0 * m_fallSpeed) - m_initialTime;
     if (m_bitsPrecision)
       intt &= (1<<m_bitsPrecision)-1;
 
@@ -846,7 +847,8 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(Width()/(static_cast<float>(m_dotSize)*2.0)) + ";\n";
-  m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";
+  m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";//TODO get from settings
+  //m_defines += "const vec3 cColor = vec3(.1,.99,.4);\n";//TODO get from settings
 
   m_defines += "uniform sampler2D iChannel0;\n";
   if (g_presets[m_currentPreset].channel[1] != -1)

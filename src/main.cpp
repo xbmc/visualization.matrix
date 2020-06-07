@@ -178,7 +178,7 @@ CVisualizationMatrix::CVisualizationMatrix()
     m_pcm(new float[AUDIO_BUFFER]())
 {
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
-  m_dotSize = kodi::GetSettingInt("dotsize");
+  m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
 }
 
@@ -846,7 +846,7 @@ void CVisualizationMatrix::GatherDefines()
 #endif
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
-  m_defines += "const float cColumns = " + std::to_string(Width()/(static_cast<float>(m_dotSize)*2.0)) + ";\n";
+  m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
   m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";//TODO get from settings
   //m_defines += "const vec3 cColor = vec3(.1,.99,.4);\n";//TODO get from settings
 

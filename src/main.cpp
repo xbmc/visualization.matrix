@@ -542,12 +542,12 @@ void CVisualizationMatrix::Launch(int preset)
   // Logo
   if (!m_shaderTextures[1].texture.empty())
   {
-    m_channelTextures[1] = CreateTexture(m_shaderTextures[1].texture, GL_RED, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[1] = CreateTexture(m_shaderTextures[1].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   }
   // Noise
   if (!m_shaderTextures[2].texture.empty())
   {
-    m_channelTextures[2] = CreateTexture(m_shaderTextures[2].texture, GL_RED, GL_LINEAR, GL_REPEAT);
+    m_channelTextures[2] = CreateTexture(m_shaderTextures[2].texture, GL_RGBA, GL_LINEAR, GL_REPEAT);
   }
   // Album
   if (!m_shaderTextures[3].texture.empty())

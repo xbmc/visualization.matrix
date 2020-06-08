@@ -321,6 +321,7 @@ bool CVisualizationMatrix::PrevPreset()
 
 bool CVisualizationMatrix::LoadPreset(int select)
 {
+  kodi::Log(ADDON_LOG_DEBUG, "Loading preset %i\n",select);
   m_currentPreset = select % g_presets.size();
   Launch(m_currentPreset);
   UpdateAlbumart();
@@ -366,12 +367,14 @@ bool CVisualizationMatrix::UpdateAlbumart()
 
 bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
 {
+  m_albumArt = albumart;
+
+  kodi::Log(ADDON_LOG_DEBUG, "Updating album art %s\n",albumart.c_str());
   if (g_presets[m_currentPreset].channel[3] != 2)
   {
     return false;
   }
 
-  m_albumArt = albumart;
   std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
   thumb = thumb.substr(0,8);
   std::string special = std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();
@@ -430,6 +433,28 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
     glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
+    if (g_presets[m_currentPreset].channel[3] == 2)
+    {
+      double logotimer = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+      float delta = static_cast<float>(logotimer - m_lastAlbumChange)*0.6f;
+      GLfloat r = std::max(sin(delta),0.0f)*0.7f;
+      GLfloat g = std::max(sin(delta - 1.0f),0.0f)*0.7f;
+      GLfloat b = std::max(sin(delta - 2.0f),0.0f)*0.7f;
+      glUniform3f(m_attrAlbumRGBLoc, r, g, b);
+      if (m_lastAlbumChange == 0)
+      {
+        glUniform3f(m_attrAlbumPositionLoc, 0.f, 0.f, 2.0f);
+      }
+      if (logotimer - m_lastAlbumChange >= 10.)
+      {
+        float x = static_cast<GLfloat>(std::fmod(logotimer * 1234., 1.) * (static_cast<double>(Width())/static_cast<double>(Height()) + 1.) - 1.);
+        float y = static_cast<GLfloat>(std::fmod(logotimer * 7654., 1.));
+        glUniform3f(m_attrAlbumPositionLoc, x, y, 2.0f);//FIXME: proper framing, the album can reach over the edge of the screen
+        m_lastAlbumChange = logotimer;
+      }
+      //m_defines += "uniform vec3 uAlbumPosition;\n";
+      //m_defines += "uniform vec3 uAlbumRGB;\n";
+    }
     /*
     time_t now = time(NULL);
     tm *ltm = localtime(&now);
@@ -552,7 +577,7 @@ void CVisualizationMatrix::Launch(int preset)
   // Album
   if (!m_shaderTextures[3].texture.empty())
   {
-    m_channelTextures[3] = CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_REPEAT);
+    m_channelTextures[3] = CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   }
 
   /*
@@ -624,6 +649,8 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   //m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
   m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iGlobalTime");
+  m_attrAlbumPositionLoc = glGetUniformLocation(matrixShader, "iAlbumPosition");
+  m_attrAlbumRGBLoc = glGetUniformLocation(matrixShader, "iAlbumRGB");
   //m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
   //m_attrMouseLoc = glGetUniformLocation(matrixShader, "iMouse");
   //m_attrDateLoc = glGetUniformLocation(matrixShader, "iDate");
@@ -737,29 +764,32 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
 
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   free(image);
-  /**/
+  */
   int width,height,n;
   //n = 1;
   unsigned char* image;
   stbi_set_flip_vertically_on_load(true);
-  if (internalFormat == GL_RGBA)
-  {
-    image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
-  }
+  /*
   if (internalFormat == GL_RED)
   {
     image = stbi_load(file.c_str(), &height, &width, &n, STBI_grey);
   }
+  else
+  {
+    image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
+  }
+  */
+
+  image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
   if (image == nullptr)
   {
     kodi::Log(ADDON_LOG_ERROR, "couldn't load image");
     return 0;
   }  
 
-  GLuint texture = CreateTexture(image, internalFormat, width, height, internalFormat, scaling, repeat);
+  GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   stbi_image_free(image);
   image = nullptr;
-  /**/
 
   return texture;
 }
@@ -885,6 +915,11 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += "const vec2 iResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";//TODO remove from shaders
   }
 
+  if (g_presets[m_currentPreset].channel[3] == 2)
+  {
+    m_defines += "uniform vec3 iAlbumPosition = vec3(0.5, 0.5, 2.0);\n";
+    m_defines += "uniform vec3 iAlbumRGB;\n";
+  }
 
   kodi::Log(ADDON_LOG_ERROR, m_defines.c_str());
 }

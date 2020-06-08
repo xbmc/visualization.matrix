@@ -74,6 +74,7 @@ private:
 
   bool m_initialized = false;
   int64_t m_initialTime = 0; // in ms
+  double m_lastAlbumChange = 0; // in ms
   int m_bitsPrecision = 0;
   int m_currentPreset = 0;
   float m_dotSize = 0.0;
@@ -87,6 +88,8 @@ private:
 
   GLint m_attrResolutionLoc = 0;
   GLint m_attrGlobalTimeLoc = 0;
+  GLint m_attrAlbumPositionLoc = 0;
+  GLint m_attrAlbumRGBLoc = 0;
   //GLint m_attrChannelTimeLoc = 0;
   //GLint m_attrMouseLoc = 0;
   //GLint m_attrDateLoc = 0;

@@ -10,8 +10,8 @@
 
 #define VIGNETTEINTENSITY 0.05
 
-const vec3 uAlbumPosition = vec3(.0,.0,.5);//x,y,scale
-const vec3 uAlbumRGB = vec3(0.,1.,0.);
+//uniform vec3 uAlbumPosition = vec3(1.77777,1.,2.);//x,y,scale - at scale 2.5: x[-.25,1.25]
+//const vec3 uAlbumRGB = vec3(0.,1.,0.);
 
 #ifdef lowpower
 float h11(float p)
@@ -43,14 +43,15 @@ void main(void)
     //vec2 albumcoords = (fragCoord*2.)/iResolution.y;
     //albumcoords += vec2(-2.*iResolution.x/iResolution.y+1.,-1.)*vec2(fract(tick*1234.4321),fract(tick*5678.8765));
 
-    vec2 albumcoords = uv*uAlbumPosition.z + uAlbumPosition.xy;
+    vec2 albumcoords = uv*iAlbumPosition.z + iAlbumPosition.xy;
     albumcoords -= distort*vec2(DISTORTFACTORX,DISTORTFACTORY);
-    
+
     vec3 album = texture(iChannel3, albumcoords).rgb;
     //thanks GLES 2.0 for not having clamping to border
     album *= step(0.,albumcoords).x - step(1.,albumcoords).x;
     album *= step(0.,albumcoords).y - step(1.,albumcoords).y;
-    float tex = dot(album,uAlbumRGB);
+    float tex = dot(album,iAlbumRGB);
+    //tex = album.r;
     
     tex *= .9 - wav*.2;
     //Shadow effect around the KODI texture. Needs a prepared texture to work.
@@ -94,7 +95,6 @@ void main(void)
     vec3 col = basecolor*cColor+peakcolor;
 
     col *= INTENSITY;
-    
+
     FragColor = vec4(col,1.0);
-    
 }

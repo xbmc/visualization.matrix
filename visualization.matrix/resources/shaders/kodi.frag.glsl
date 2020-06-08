@@ -44,7 +44,6 @@ void main(void)
     //Shadow effect around the KODI texture. Needs a prepared texture to work.
     float shadow = (wav+.5)*.25;
     tex = (max(shadow,tex)-shadow)/(1.-shadow);
-        
     
     //"interlaced" logo distortion effect
     float line = mod(gv.y*sign(wav),2.);
@@ -81,7 +80,7 @@ void main(void)
     //vec3 col = vec3(basecolor*RED+peakcolor,basecolor*GREEN+peakcolor,basecolor*BLUE+peakcolor);
     vec3 col = basecolor*cColor+peakcolor;
 
-    col *= INTENSITY;    
+    col *= INTENSITY;
     
     FragColor = vec4(col,1.0);
 }

@@ -37,7 +37,6 @@ void main(void)
     float peakcolor = smoothstep(.35,.00,d)*bw;
     float basecolor = smoothstep(.85,.00,d)*bw;
     
-
     //vec3 col = vec3(basecolor*RED+peakcolor,basecolor*GREEN+peakcolor,basecolor*BLUE+peakcolor);
     vec3 col = basecolor*cColor+peakcolor;
 

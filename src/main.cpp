@@ -795,14 +795,14 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#version 150\n";
   m_defines += "#extension GL_OES_standard_derivatives : enable\n";
   m_defines += "out vec4 FragColor;\n";
-  m_defines += "#ifndef texture2D\n#define texture2D texture\n#endif\n";
+  m_defines += "#ifndef texture2D\n#define texture2D texture\n#endif\n\n";
 #else
   m_defines += "#version 100\n";
   m_defines += "#extension GL_OES_standard_derivatives : enable\n";
   m_defines += "precision mediump float\n";
-  m_defines += "#define FragColor gl_FragColor\n";
-  m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n";
   m_defines += "#define lowpower\n";
+  m_defines += "#define FragColor gl_FragColor\n";
+  m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";

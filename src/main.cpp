@@ -180,6 +180,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
   m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
+  m_lastAlbumChange = 0.0;
 }
 
 CVisualizationMatrix::~CVisualizationMatrix()
@@ -421,6 +422,33 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
         }
       }
       m_needsUpload = false;
+
+
+      if (g_presets[m_currentPreset].channel[3] == 2)
+      {
+        double logotimer = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+        float delta = static_cast<float>(logotimer - m_lastAlbumChange)*0.6f;
+        GLfloat r = std::max(sin(delta),0.0f)*0.7f;
+        GLfloat g = std::max(sin(delta - 1.0f),0.0f)*0.7f;
+        GLfloat b = std::max(sin(delta - 2.0f),0.0f)*0.7f;
+        glUniform3f(m_attrAlbumRGBLoc, r, g, b);
+        if (m_lastAlbumChange == 0.0)
+        {
+          glUniform3f(m_attrAlbumPositionLoc, 0.f, 0.f, 2.0f);
+        }
+        if (logotimer - m_lastAlbumChange >= 10.)
+        {
+          m_albumX = static_cast<GLfloat>(std::fmod(logotimer * 1234., 1.) * (static_cast<double>(Width())/static_cast<double>(Height()) + 1.) - 1.);
+          m_albumY = static_cast<GLfloat>(std::fmod(logotimer * 7654., 1.));
+          m_lastAlbumChange = logotimer;
+          m_AlbumNeedsUpload = true;
+        }
+        if (m_AlbumNeedsUpload)
+        {
+          glUniform3f(m_attrAlbumPositionLoc, m_albumX, m_albumY, 2.0f);//FIXME: proper framing, the album can reach over the edge of the screen
+          m_AlbumNeedsUpload = true;//FIXME: limit upload to the actual album shader
+        }
+      }
     }
 
     float t = intt / 1000.0f;
@@ -433,28 +461,6 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
     glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
-    if (g_presets[m_currentPreset].channel[3] == 2)
-    {
-      double logotimer = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-      float delta = static_cast<float>(logotimer - m_lastAlbumChange)*0.6f;
-      GLfloat r = std::max(sin(delta),0.0f)*0.7f;
-      GLfloat g = std::max(sin(delta - 1.0f),0.0f)*0.7f;
-      GLfloat b = std::max(sin(delta - 2.0f),0.0f)*0.7f;
-      glUniform3f(m_attrAlbumRGBLoc, r, g, b);
-      if (m_lastAlbumChange == 0)
-      {
-        glUniform3f(m_attrAlbumPositionLoc, 0.f, 0.f, 2.0f);
-      }
-      if (logotimer - m_lastAlbumChange >= 10.)
-      {
-        float x = static_cast<GLfloat>(std::fmod(logotimer * 1234., 1.) * (static_cast<double>(Width())/static_cast<double>(Height()) + 1.) - 1.);
-        float y = static_cast<GLfloat>(std::fmod(logotimer * 7654., 1.));
-        glUniform3f(m_attrAlbumPositionLoc, x, y, 2.0f);//FIXME: proper framing, the album can reach over the edge of the screen
-        m_lastAlbumChange = logotimer;
-      }
-      //m_defines += "uniform vec3 uAlbumPosition;\n";
-      //m_defines += "uniform vec3 uAlbumRGB;\n";
-    }
     /*
     time_t now = time(NULL);
     tm *ltm = localtime(&now);
@@ -917,7 +923,7 @@ void CVisualizationMatrix::GatherDefines()
 
   if (g_presets[m_currentPreset].channel[3] == 2)
   {
-    m_defines += "uniform vec3 iAlbumPosition = vec3(0.5, 0.5, 2.0);\n";
+    m_defines += "uniform vec3 iAlbumPosition;\n";
     m_defines += "uniform vec3 iAlbumRGB;\n";
   }
 

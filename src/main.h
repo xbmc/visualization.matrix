@@ -74,7 +74,10 @@ private:
 
   bool m_initialized = false;
   int64_t m_initialTime = 0; // in ms
-  double m_lastAlbumChange = 0; // in ms
+  double m_lastAlbumChange = 0;
+  bool m_AlbumNeedsUpload = true;
+  float m_albumX = 0.0;
+  float m_albumY = 0.0;
   int m_bitsPrecision = 0;
   int m_currentPreset = 0;
   float m_dotSize = 0.0;

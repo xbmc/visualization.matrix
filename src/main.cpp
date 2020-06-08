@@ -180,6 +180,9 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
   m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
+  m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
+  m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
+  m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
   m_lastAlbumChange = 0.0;
 }
 
@@ -893,8 +896,7 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
-  m_defines += "const vec3 cColor = vec3(.2,.8,1.);\n";//TODO get from settings
-  //m_defines += "const vec3 cColor = vec3(.1,.99,.4);\n";//TODO get from settings
+  m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
 
   m_defines += "uniform sampler2D iChannel0;\n";
   if (g_presets[m_currentPreset].channel[1] != -1)

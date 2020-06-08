@@ -25,7 +25,7 @@ msgid "Pixel size"
 msgstr ""
 
 msgctxt "#30002"
-msgid "Size of a \"Pixel\" which forms the rain."
+msgid "Size of a \"pixel\" which forms the rain."
 msgstr ""
 
 msgctxt "#30003"
@@ -34,6 +34,22 @@ msgstr ""
 
 msgctxt "#30004"
 msgid "The speed how fast the rain is falling."
+msgstr ""
+
+msgctxt "#30050"
+msgid "Red"
+msgstr ""
+
+msgctxt "#30051"
+msgid "Green"
+msgstr ""
+
+msgctxt "#30052"
+msgid "Blue"
+msgstr ""
+
+msgctxt "#30053"
+msgid "The color of the \"pixels\"."
 msgstr ""
 
 msgctxt "#30100"

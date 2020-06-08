@@ -20,11 +20,44 @@
           </control>
         </setting>
         <setting id="fallspeed" type="integer" label="30003" help="30004">
-          <default>25</default>
+          <default>51</default>
           <constraints>
             <minimum>1</minimum>
             <step>1</step>
             <maximum>100</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <popup>false</popup>
+          </control>
+        </setting>
+        <setting id="red" type="integer" label="30050" help="30053">
+          <default>51</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>255</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <popup>false</popup>
+          </control>
+        </setting>
+        <setting id="green" type="integer" label="30051" help="30053">
+          <default>204</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>255</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <popup>false</popup>
+          </control>
+        </setting>
+        <setting id="blue" type="integer" label="30052" help="30053">
+          <default>255</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>255</maximum>
           </constraints>
           <control type="slider" format="integer">
             <popup>false</popup>

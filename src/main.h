@@ -107,6 +107,13 @@ private:
 
   struct
   {
+    float red;
+    float green;
+    float blue;
+  } m_dotColor;
+
+  struct
+  {
     GLuint vertex_buffer;
     GLuint vertex_buffer_logo;
     GLuint attr_vertex_e;

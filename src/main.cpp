@@ -799,8 +799,8 @@ void CVisualizationMatrix::GatherDefines()
 #else
   m_defines += "#version 100\n\n";
   m_defines += "#extension GL_OES_standard_derivatives : enable\n\n";
-  m_defines += "precision mediump float\n";
-  m_defines += "precision mediump int\n\n";
+  m_defines += "precision mediump float;\n";
+  m_defines += "precision mediump int;\n\n";
   m_defines += "#define lowpower\n";
   m_defines += "#define FragColor gl_FragColor\n";
   //m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";

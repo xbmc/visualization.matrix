@@ -382,16 +382,16 @@ bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
 
   if (kodi::vfs::FileExists(special + std::string(".png")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
     return true;
   }
   else if (kodi::vfs::FileExists(special + std::string(".jpg")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
     return true;
   }
 
-  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/textures/logo.png"), GL_RGB, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/textures/logo.png"), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   
   return false;
 }

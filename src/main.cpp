@@ -673,7 +673,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");
-
+  /*
   std::string vertShader = kodi::GetAddonPath("resources/shaders/main_display_" GL_TYPE_STRING ".vert.glsl");
   std::string fraqShader = kodi::GetAddonPath("resources/shaders/main_display_" GL_TYPE_STRING ".frag.glsl");
   if (!m_displayShader.LoadShaderFiles(vertShader, fraqShader) ||
@@ -685,6 +685,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   m_state.uTexture = glGetUniformLocation(m_displayShader.ProgramHandle(), "uTexture");
   m_state.attr_vertex_r = glGetAttribLocation(m_displayShader.ProgramHandle(), "vertex");
+  */
 
   // Prepare a texture to render to
   glActiveTexture(GL_TEXTURE0);

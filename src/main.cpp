@@ -803,10 +803,9 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "precision mediump int;\n\n";
   m_defines += "#define lowpower\n";
   m_defines += "#define FragColor gl_FragColor\n";
-  //m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
+  m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
-  //m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
-  m_defines += "const float iDotSize = 3.;\n";//TODO remove from shaders
+  m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
   m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";

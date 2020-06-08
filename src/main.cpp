@@ -797,17 +797,30 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "out vec4 FragColor;\n";
   m_defines += "#ifndef texture2D\n#define texture2D texture\n#endif\n\n";
 #else
-  m_defines += "#version 100\n";
-  m_defines += "#extension GL_OES_standard_derivatives : enable\n";
+  m_defines += "#version 100\n\n";
+  m_defines += "#extension GL_OES_standard_derivatives : enable\n\n";
   m_defines += "precision mediump float\n";
+  m_defines += "precision mediump int\n\n";
   m_defines += "#define lowpower\n";
   m_defines += "#define FragColor gl_FragColor\n";
-  m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
+  //m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
-  m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
+  //m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
+  m_defines += "const float iDotSize = 3.;\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
   m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
+
+  if (m_state.fbwidth && m_state.fbheight)
+  {
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";
+    m_defines += "const vec2 iResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";//TODO remove from shaders
+  }
+  else
+  {
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";
+    m_defines += "const vec2 iResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";//TODO remove from shaders
+  }
 
   m_defines += "uniform sampler2D iChannel0;\n";
   if (g_presets[m_currentPreset].channel[1] != -1)
@@ -824,16 +837,6 @@ void CVisualizationMatrix::GatherDefines()
   }
 
   
-  if (m_state.fbwidth && m_state.fbheight)
-  {
-    m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";
-    m_defines += "const vec2 iResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";//TODO remove from shaders
-  }
-  else
-  {
-    m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";
-    m_defines += "const vec2 iResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";//TODO remove from shaders
-  }
 
   if (g_presets[m_currentPreset].channel[3] == 2)
   {

@@ -103,7 +103,7 @@ private:
   GLint m_attrDotSizeLoc = 0;
 
   kodi::gui::gl::CShaderProgram m_matrixShader;
-  kodi::gui::gl::CShaderProgram m_displayShader;
+  //kodi::gui::gl::CShaderProgram m_displayShader;
 
   struct
   {
@@ -117,6 +117,7 @@ private:
     GLuint vertex_buffer;
     GLuint vertex_buffer_logo;
     GLuint attr_vertex_e;
+    GLuint attr_vertex_logo;
     GLuint attr_vertex_r, uTexture;
     GLuint effect_fb;
     GLuint framebuffer_texture;

@@ -493,12 +493,11 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
   // Draw the effect to a texture or direct to framebuffer
   glBindFramebuffer(GL_FRAMEBUFFER, effect_fb);
 
-  GLuint attr_vertex = shader == m_matrixShader.ProgramHandle() ? m_state.attr_vertex_e : m_state.attr_vertex_r;
   glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer);
-  glVertexAttribPointer(attr_vertex, 4, GL_FLOAT, 0, 16, 0);
-  glEnableVertexAttribArray(attr_vertex);
+  glVertexAttribPointer(m_state.attr_vertex_e, 4, GL_FLOAT, 0, 16, 0);
+  glEnableVertexAttribArray(m_state.attr_vertex_e);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-  glDisableVertexAttribArray(attr_vertex);
+  glDisableVertexAttribArray(m_state.attr_vertex_e);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   for (int i = 0; i < 4; i++)
@@ -671,7 +670,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
   //m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");//TODO: move to define
 
-  m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
+  //m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");
   /*
   std::string vertShader = kodi::GetAddonPath("resources/shaders/main_display_" GL_TYPE_STRING ".vert.glsl");

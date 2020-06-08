@@ -77,100 +77,6 @@ const std::vector<std::string> g_fileTextures =
   "noise.png",
 };
 
-#if defined(HAS_GL)
-
-std::string fsHeader =
-R"shader(#version 150
-
-#extension GL_OES_standard_derivatives : enable
-
-//uniform vec2 iResolution;
-uniform float iGlobalTime;
-//uniform float iDotSize;
-//uniform float iChannelTime[4];
-//uniform vec4 iMouse;
-//uniform vec4 iDate;
-//uniform float iSampleRate;
-//uniform vec3 iChannelResolution[4];
-//uniform sampler2D iChannel0;
-//uniform sampler2D iChannel1;
-//uniform sampler2D iChannel2;
-//uniform sampler2D iChannel3;
-
-//out vec4 FragColor;
-
-#define iTime iGlobalTime
-
-#ifndef texture2D
-#define texture2D texture
-#endif
-)shader";
-
-std::string fsFooter =
-R"shader(
-/*
-void main(void)
-{
-  vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
-  mainImage(color, gl_FragCoord.xy);
-  color.w = 1.0;
-  FragColor = color;
-}
-*/
-)shader";
-
-#else
-
-std::string fsHeader =
-R"shader(#version 100
-
-#extension GL_OES_standard_derivatives : enable
-
-precision mediump float;
-precision mediump int;
-
-//uniform vec2 iResolution;
-uniform float iGlobalTime;
-//uniform float iDotSize;
-//uniform float iChannelTime[4];
-//uniform vec4 iMouse;
-//uniform vec4 iDate;
-//uniform float iSampleRate;
-//uniform vec3 iChannelResolution[4];
-//uniform sampler2D iChannel0;
-//uniform sampler2D iChannel1;
-//uniform sampler2D iChannel2;
-//uniform sampler2D iChannel3;
-
-#define iTime iGlobalTime
-//#ifndef texture
-//#define texture texture2D
-//#endif
-/*
-#ifndef textureLod
-vec4 textureLod(sampler2D sampler, vec2 uv, float lod)
-{
-  return texture2D(sampler, uv, lod);
-}
-#endif
-*/
-)shader";
-
-std::string fsFooter =
-R"shader(
-/*
-void main(void)
-{
-  vec4 color = vec4(0.0, 0.0, 0.0, 1.0);
-  mainImage(color, gl_FragCoord.xy);
-  color.w = 1.0;
-  gl_FragColor = color;
-}
-*/
-)shader";
-
-#endif
-
 CVisualizationMatrix::CVisualizationMatrix()
   : m_kissCfg(kiss_fft_alloc(AUDIO_BUFFER, 0, nullptr, nullptr)),
     m_audioData(new GLubyte[AUDIO_BUFFER]()),
@@ -385,12 +291,12 @@ bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
 
   if (kodi::vfs::FileExists(special + std::string(".png")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
     return true;
   }
   else if (kodi::vfs::FileExists(special + std::string(".jpg")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);//FIXME: border clamping not supported by gles 2.0
+    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
     return true;
   }
 
@@ -462,7 +368,7 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     //glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
     //glUniform1f(m_attrDotSizeLoc, m_dotSize);
     //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
-    glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
+    //glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
 
     /*
     time_t now = time(NULL);
@@ -647,7 +553,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   GatherDefines();
   std::string vertMatrixShader = kodi::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
   if (!m_matrixShader.LoadShaderFiles(vertMatrixShader, shaderPath) ||
-      !m_matrixShader.CompileAndLink("", "", m_defines, fsFooter))
+      !m_matrixShader.CompileAndLink("", "", m_defines, ""))
   {
     kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current file '%s')", shaderPath.c_str());
     return;
@@ -656,7 +562,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   GLuint matrixShader = m_matrixShader.ProgramHandle();
 
   //m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
-  m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iGlobalTime");
+  m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iTime");
   m_attrAlbumPositionLoc = glGetUniformLocation(matrixShader, "iAlbumPosition");
   m_attrAlbumRGBLoc = glGetUniformLocation(matrixShader, "iAlbumRGB");
   //m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
@@ -884,11 +790,16 @@ double CVisualizationMatrix::MeasurePerformance(const std::string& shaderPath, i
 
 void CVisualizationMatrix::GatherDefines()
 {
-  m_defines = fsHeader;
-  m_defines += "\n";
+  m_defines = "";
 #if defined(HAS_GL)
+  m_defines += "#version 150\n";
+  m_defines += "#extension GL_OES_standard_derivatives : enable\n";
   m_defines += "out vec4 FragColor;\n";
+  m_defines += "#ifndef texture2D\n#define texture2D texture\n#endif\n";
 #else
+  m_defines += "#version 100\n";
+  m_defines += "#extension GL_OES_standard_derivatives : enable\n";
+  m_defines += "precision mediump float\n";
   m_defines += "#define FragColor gl_FragColor\n";
   m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n";
   m_defines += "#define lowpower\n";
@@ -929,6 +840,7 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += "uniform vec3 iAlbumPosition;\n";
     m_defines += "uniform vec3 iAlbumRGB;\n";
   }
+  m_defines += "uniform float iTime;\n";
 
   kodi::Log(ADDON_LOG_ERROR, m_defines.c_str());
 }

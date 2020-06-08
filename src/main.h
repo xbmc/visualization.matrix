@@ -89,7 +89,7 @@ private:
   std::string m_albumArt = "";
   std::string m_defines = "";
 
-  GLint m_attrResolutionLoc = 0;
+  //GLint m_attrResolutionLoc = 0;
   GLint m_attrGlobalTimeLoc = 0;
   GLint m_attrAlbumPositionLoc = 0;
   GLint m_attrAlbumRGBLoc = 0;
@@ -100,7 +100,7 @@ private:
   //GLint m_attrChannelResolutionLoc = 0;
   GLint m_attrChannelLoc[4] = {0};
   GLuint m_channelTextures[4] = {0};
-  GLint m_attrDotSizeLoc = 0;
+  //GLint m_attrDotSizeLoc = 0;
 
   kodi::gui::gl::CShaderProgram m_matrixShader;
   //kodi::gui::gl::CShaderProgram m_displayShader;

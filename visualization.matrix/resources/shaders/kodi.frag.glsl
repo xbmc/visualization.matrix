@@ -15,10 +15,24 @@ float h11(float p)
 {
     return fract(fract(p * .1031) * (p + 33.33));
 }
+
+vec3 bw2col(float bw, float d)
+{
+    float peakcolor = .6-d;
+    float basecolor = .8-d;
+    return (basecolor*cColor+peakcolor)*bw;
+}
 #else
 float h11(float p)
 {
     return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
+}
+
+vec3 bw2col(float bw, float d)
+{
+    float peakcolor = smoothstep(.35,.0,d)*bw;
+    float basecolor = smoothstep(.85,.0,d)*bw;
+    return basecolor*cColor+peakcolor;
 }
 #endif
 
@@ -74,13 +88,10 @@ void main(void)
 	
     //pseudo pixels (dots)
     float d = length(fract(uv*cColumns)-.5);
-    float peakcolor = smoothstep(.35,.00,d)*bw;
-    float basecolor = smoothstep(.85,.00,d)*bw;
-
-    //vec3 col = vec3(basecolor*RED+peakcolor,basecolor*GREEN+peakcolor,basecolor*BLUE+peakcolor);
-    vec3 col = basecolor*cColor+peakcolor;
-
-    col *= INTENSITY;
+    
+    vec3 col = bw2col(bw,d);
+    
+    //col *= INTENSITY;
     
     FragColor = vec4(col,1.0);
 }

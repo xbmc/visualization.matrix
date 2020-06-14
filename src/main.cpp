@@ -77,6 +77,59 @@ const std::vector<std::string> g_fileTextures =
   "noise.png",
 };
 
+std::string fsCommonFunctions = 
+R"functions(#define RNDSEED1 170.12
+#define RNDSEED2 7572.1
+
+#define INTENSITY 1.0
+#define MININTENSITY 0.075
+
+#define DISTORTTHRESHOLD 0.4
+#define DISTORTFACTORX 0.6
+#define DISTORTFACTORY 0.4
+
+#define VIGNETTEINTENSITY 0.05
+
+#ifdef lowpower
+float h11(float p)
+{
+  return fract(fract(p * .1031) * (p + 33.33));
+}
+
+float waveform(vec2 uv)
+{
+  float wave = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x - .5;
+  return min(abs(uv.y*20.+wave*10.),0.5);
+}
+
+vec3 bw2col(float bw, float d)
+{
+  float peakcolor = .6-d;
+  float basecolor = .8-d;
+  return (basecolor*cColor+peakcolor)*bw;
+}
+#else
+float h11(float p)
+{
+  return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
+}
+
+float waveform(vec2 uv)
+{
+  float wave = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.5 + uv.y;
+  return abs(smoothstep(.225,.275,wave) -.5);
+}
+
+vec3 bw2col(float bw, float d)
+{
+  float peakcolor = smoothstep(.35,.0,d)*bw;
+  float basecolor = smoothstep(.85,.0,d)*bw;
+  return basecolor*cColor+peakcolor;
+}
+#endif
+
+)functions";
+
 CVisualizationMatrix::CVisualizationMatrix()
   : m_kissCfg(kiss_fft_alloc(AUDIO_BUFFER, 0, nullptr, nullptr)),
     m_audioData(new GLubyte[AUDIO_BUFFER]()),
@@ -848,6 +901,8 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += "uniform vec3 iAlbumRGB;\n";
   }
   m_defines += "uniform float iTime;\n";
+
+  m_defines += fsCommonFunctions;
 
   kodi::Log(ADDON_LOG_ERROR, m_defines.c_str());
 }

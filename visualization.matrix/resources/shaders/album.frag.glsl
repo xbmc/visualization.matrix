@@ -1,30 +1,3 @@
-#define RNDSEED1 170.12
-#define RNDSEED2 7572.1
-
-#define INTENSITY 1.0
-#define MININTENSITY 0.075
-
-#define DISTORTTHRESHOLD 0.4
-#define DISTORTFACTORX 0.6
-#define DISTORTFACTORY 0.4
-
-#define VIGNETTEINTENSITY 0.05
-
-//uniform vec3 uAlbumPosition = vec3(1.77777,1.,2.);//x,y,scale - at scale 2.5: x[-.25,1.25]
-//const vec3 uAlbumRGB = vec3(0.,1.,0.);
-
-#ifdef lowpower
-float h11(float p)
-{
-    return fract(fract(p * .1031) * (p + 33.33));
-}
-#else
-float h11(float p)
-{
-    return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
-}
-#endif
-
 void main(void)
 {
     //general stuff

@@ -1,18 +1,3 @@
-#define RNDSEED1 170.12
-#define RNDSEED2 7572.1
-
-#ifdef lowpower
-float h11(float p)
-{
-    return fract(fract(p * .1031) * (p + 33.33));
-}
-#else
-float h11(float p)
-{
-    return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
-}
-#endif
-
 void main(void)
 {
     //general stuff

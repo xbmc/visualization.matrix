@@ -1,27 +1,3 @@
-#define RNDSEED1 170.12
-#define RNDSEED2 7572.1
-
-#define INTENSITY 1.0
-#define MININTENSITY 0.075
-
-#define DISTORTTHRESHOLD 0.4
-#define DISTORTFACTORX 0.6
-#define DISTORTFACTORY 0.4
-
-#define VIGNETTEINTENSITY 0.05
-
-#ifdef lowpower
-float h11(float p)
-{
-    return fract(fract(p * .1031) * (p + 33.33));
-}
-#else
-float h11(float p)
-{
-    return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
-}
-#endif
-
 void main(void)
 {
     //general stuff
@@ -42,8 +18,7 @@ void main(void)
     bw = min(bw,1.99);
     
     //waveform
-    float wave = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.5 + uv.y;
-    bw -= abs(smoothstep(.225,.275,wave) -.5);
+	bw -= waveform(uv);
     
     //noise texture
 	bw *= texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize))).x;

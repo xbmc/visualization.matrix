@@ -89,6 +89,12 @@ float waveform(vec2 uv)
   return min(abs(uv.y*20.+wave*10.),0.5);
 }
 
+float noise(vec2 gv)
+{
+	//return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize) +iTime*cNoiseFluctuation)).x;
+	return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize))).x;
+}
+
 vec3 bw2col(float bw, vec2 uv)
 {
   float d = length(fract(uv*cColumns)-.5);
@@ -109,6 +115,11 @@ float waveform(vec2 uv)
 {
   float wave = texture(iChannel0,vec2(uv.x*.15+.5,0.75)).x*.5 + uv.y;
   return abs(smoothstep(.225,.275,wave) -.5);
+}
+
+float noise(vec2 gv)
+{
+	return texture(iChannel2, (gv/cResolution*iDotSize*400.33) + iTime*cNoiseFluctuation).x;
 }
 
 vec3 bw2col(float bw, vec2 uv)
@@ -134,6 +145,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
   m_lowpower = kodi::GetSettingBoolean("lowpower");
+  m_noiseFluctuation = m_lowpower ? static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0001f : static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.001f;
   m_lastAlbumChange = 0.0;
 }
 
@@ -853,6 +865,7 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
+  m_defines += "const float cNoiseFluctuation = " + std::to_string(m_noiseFluctuation) + ";\n";
   m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
 
   if (m_state.fbwidth && m_state.fbheight)

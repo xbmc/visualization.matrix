@@ -36,6 +36,14 @@ msgctxt "#30004"
 msgid "The speed how fast the rain is falling."
 msgstr ""
 
+msgctxt "#30005"
+msgid "Noise fluctuation"
+msgstr ""
+
+msgctxt "#30006"
+msgid "The speed how fast the noise is changing. "
+msgstr ""
+
 msgctxt "#30050"
 msgid "Red"
 msgstr ""
@@ -53,7 +61,7 @@ msgid "The color of the \"pixels\"."
 msgstr ""
 
 msgctxt "#30060"
-msgid "Lower quality visuals"
+msgid "Enable performance optimizations"
 msgstr ""
 
 msgctxt "#30061"

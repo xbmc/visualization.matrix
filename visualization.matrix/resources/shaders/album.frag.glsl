@@ -53,7 +53,7 @@ void main(void)
     bw = min(bw,1.99);
     
     //noise texture
-	bw *= texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize))).x;
+	bw *= noise(gv);
 
 	//vignette effect
 	float vignette = length(uv)*VIGNETTEINTENSITY;

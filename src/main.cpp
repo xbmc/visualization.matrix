@@ -77,21 +77,8 @@ const std::vector<std::string> g_fileTextures =
   "noise.png",
 };
 
-std::string fsCommonFunctions = 
-R"functions(#define RNDSEED1 170.12
-#define RNDSEED2 7572.1
-
-#define INTENSITY 1.0
-#define MININTENSITY 0.075
-
-#define DISTORTTHRESHOLD 0.4
-#define DISTORTFACTORX 0.6
-#define DISTORTFACTORY 0.4
-
-#define VIGNETTEINTENSITY 0.05
-
-#ifdef lowpower
-float h11(float p)
+std::string fsCommonFunctionsLowPower = 
+R"functions(float h11(float p)
 {
   return fract(fract(p * .1031) * (p + 33.33));
 }
@@ -109,8 +96,11 @@ vec3 bw2col(float bw, vec2 uv)
   float basecolor = .8-d;
   return (basecolor*cColor+peakcolor)*bw;
 }
-#else
-float h11(float p)
+
+)functions";
+
+std::string fsCommonFunctionsNormal = 
+R"functions(float h11(float p)
 {
   return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
 }
@@ -128,7 +118,6 @@ vec3 bw2col(float bw, vec2 uv)
   float basecolor = smoothstep(.85,.0,d)*bw;
   return basecolor*cColor+peakcolor;
 }
-#endif
 
 )functions";
 
@@ -860,10 +849,6 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#define FragColor gl_FragColor\n";
   m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
-  if (m_lowpower)
-  {
-    m_defines += "#define lowpower\n";
-  }
 
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
@@ -882,30 +867,53 @@ void CVisualizationMatrix::GatherDefines()
   }
 
   m_defines += "uniform sampler2D iChannel0;\n";
+
   if (g_presets[m_currentPreset].channel[1] != -1)
   {
     m_defines += "uniform sampler2D iChannel1;\n";
   }
+
   if (g_presets[m_currentPreset].channel[2] != -1)
   {
     m_defines += "uniform sampler2D iChannel2;\n";
   }
+  
   if (g_presets[m_currentPreset].channel[3] != -1)
   {
     m_defines += "uniform sampler2D iChannel3;\n";
   }
-
-  
 
   if (g_presets[m_currentPreset].channel[3] == 2)
   {
     m_defines += "uniform vec3 iAlbumPosition;\n";
     m_defines += "uniform vec3 iAlbumRGB;\n";
   }
+
   m_defines += "uniform float iTime;\n";
 
-  m_defines += fsCommonFunctions;
+  //TODO: make pretty
+  m_defines += "#define RNDSEED1 170.12\n";
+  m_defines += "#define RNDSEED2 7572.1\n";
 
-  kodi::Log(ADDON_LOG_ERROR, m_defines.c_str());
+  m_defines += "#define INTENSITY 1.0\n";
+  m_defines += "#define MININTENSITY 0.075\n";
+
+  m_defines += "#define DISTORTTHRESHOLD 0.4\n";
+  m_defines += "#define DISTORTFACTORX 0.6\n";
+  m_defines += "#define DISTORTFACTORY 0.4\n";
+
+  m_defines += "#define VIGNETTEINTENSITY 0.05\n";
+
+  if (m_lowpower)
+  {
+    m_defines += fsCommonFunctionsLowPower;
+  }
+  else
+  {
+    m_defines += fsCommonFunctionsNormal;
+  }
+
+  kodi::Log(ADDON_LOG_DEBUG, "Fragment shader header\n%s",m_defines.c_str());
 }
+
 ADDONCREATOR(CVisualizationMatrix) // Don't touch this!

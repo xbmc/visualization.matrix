@@ -52,6 +52,14 @@ msgctxt "#30053"
 msgid "The color of the \"pixels\"."
 msgstr ""
 
+msgctxt "#30060"
+msgid "Lower quality visuals"
+msgstr ""
+
+msgctxt "#30061"
+msgid "Lowers the quality of some shader calculations in order to boost performance (FPS) on slower systems."
+msgstr ""
+
 msgctxt "#30100"
 msgid "Kodi"
 msgstr ""

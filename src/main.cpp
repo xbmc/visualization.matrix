@@ -89,6 +89,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
   m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
+  m_lowpower = kodi::GetSettingBoolean("lowpower");
   m_lastAlbumChange = 0.0;
 }
 
@@ -801,10 +802,14 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#extension GL_OES_standard_derivatives : enable\n\n";
   m_defines += "precision mediump float;\n";
   m_defines += "precision mediump int;\n\n";
-  m_defines += "#define lowpower\n";
   m_defines += "#define FragColor gl_FragColor\n";
   m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
+  if (m_lowpower)
+  {
+    m_defines += "#define lowpower\n";
+  }
+
   m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";

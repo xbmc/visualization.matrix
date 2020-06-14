@@ -63,6 +63,10 @@
             <popup>false</popup>
           </control>
         </setting>
+        <setting id="lowpower" type="boolean" label="30060" help="30061">
+          <default>false</default>
+          <control type="toggle"/>
+        </setting>
       </group>
     </category>
   </section>

@@ -102,8 +102,9 @@ float waveform(vec2 uv)
   return min(abs(uv.y*20.+wave*10.),0.5);
 }
 
-vec3 bw2col(float bw, float d)
+vec3 bw2col(float bw, vec2 uv)
 {
+  float d = length(fract(uv*cColumns)-.5);
   float peakcolor = .6-d;
   float basecolor = .8-d;
   return (basecolor*cColor+peakcolor)*bw;
@@ -120,8 +121,9 @@ float waveform(vec2 uv)
   return abs(smoothstep(.225,.275,wave) -.5);
 }
 
-vec3 bw2col(float bw, float d)
+vec3 bw2col(float bw, vec2 uv)
 {
+  float d = length(fract(uv*cColumns)-.5);
   float peakcolor = smoothstep(.35,.0,d)*bw;
   float basecolor = smoothstep(.85,.0,d)*bw;
   return basecolor*cColor+peakcolor;

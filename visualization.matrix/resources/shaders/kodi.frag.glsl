@@ -49,9 +49,7 @@ void main(void)
 	bw -= vignette;
 	
     //pseudo pixels (dots)
-    float d = length(fract(uv*cColumns)-.5);
-    
-    vec3 col = bw2col(bw,d);
+    vec3 col = bw2col(bw,uv);
     
     //col *= INTENSITY;
     

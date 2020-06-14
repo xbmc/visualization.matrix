@@ -21,9 +21,7 @@ void main(void)
 	bw -= waveform(uv);
     
     //pseudo pixels (dots)
-    float d = length(fract(uv*cColumns)-.5);
-
-    vec3 col = bw2col(bw,d);
+    vec3 col = bw2col(bw,uv);
     
     //col *= INTENSITY;
     

@@ -18,12 +18,7 @@ void main(void)
     bw = min(bw,1.99);
     
     //pseudo pixels (dots)
-    float d = length(fract(uv*cColumns)-.5);
-    float peakcolor = smoothstep(.35,.00,d)*bw;
-    float basecolor = smoothstep(.85,.00,d)*bw;
-    
-    //vec3 col = vec3(basecolor*RED+peakcolor,basecolor*GREEN+peakcolor,basecolor*BLUE+peakcolor);
-    vec3 col = basecolor*cColor+peakcolor;
+    vec3 col = bw2col(bw,uv);
 
     FragColor = vec4(col,1.0);
 }

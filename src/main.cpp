@@ -119,7 +119,8 @@ float waveform(vec2 uv)
 
 float noise(vec2 gv)
 {
-	return texture(iChannel2, (gv/cResolution*iDotSize*400.33) + iTime*cNoiseFluctuation).x;
+	//return texture(iChannel2, (gv/cResolution*iDotSize*400.33) + iTime*cNoiseFluctuation).x;
+  return texture(iChannel2, (gv*.035431) + iTime*cNoiseFluctuation).x;
 }
 
 vec3 bw2col(float bw, vec2 uv)

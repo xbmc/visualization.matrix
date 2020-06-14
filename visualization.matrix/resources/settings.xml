@@ -31,11 +31,11 @@
           </control>
         </setting>
         <setting id="noisefluctuation" type="integer" label="30005" help="30006">
-          <default>50</default>
+          <default>25</default>
           <constraints>
             <minimum>1</minimum>
             <step>1</step>
-            <maximum>200</maximum>
+            <maximum>100</maximum>
           </constraints>
           <control type="slider" format="integer">
             <popup>false</popup>

@@ -142,7 +142,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
   m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
-  m_distortThreshold = static_cast<float>(kodi::GetSettingInt("distortthreshold")) * .01;
+  m_distortThreshold = static_cast<float>(kodi::GetSettingInt("distortthreshold")) * .005;
   m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
   m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;

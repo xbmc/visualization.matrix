@@ -83,6 +83,7 @@ private:
   int m_currentPreset = 0;
   float m_dotSize = 0.0;
   float m_fallSpeed = 0.25;
+  float m_distortThreshold = 0.0;
   float m_noiseFluctuation = 0.0;
 
   int m_samplesPerSec = 0; // Given by Start(...)

@@ -44,6 +44,14 @@ msgctxt "#30006"
 msgid "The speed how fast the noise is changing. "
 msgstr ""
 
+msgctxt "#30007"
+msgid "Distort threshold"
+msgstr ""
+
+msgctxt "#30008"
+msgid "Threshold of loudness at which vertical distortion occurs."
+msgstr ""
+
 msgctxt "#30050"
 msgid "Red"
 msgstr ""

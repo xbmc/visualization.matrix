@@ -142,6 +142,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
   m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
+  m_distortThreshold = static_cast<float>(kodi::GetSettingInt("distortthreshold")) * .01;
   m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
   m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
@@ -867,6 +868,7 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
   m_defines += "const float cNoiseFluctuation = " + std::to_string(m_noiseFluctuation) + ";\n";
+  m_defines += "const float cDistortThreshold = " + std::to_string(m_distortThreshold) + ";\n";
   m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
 
   if (m_state.fbwidth && m_state.fbheight)
@@ -912,7 +914,7 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#define INTENSITY 1.0\n";
   m_defines += "#define MININTENSITY 0.075\n";
 
-  m_defines += "#define DISTORTTHRESHOLD 0.4\n";
+  //m_defines += "#define DISTORTTHRESHOLD 0.4\n";
   m_defines += "#define DISTORTFACTORX 0.6\n";
   m_defines += "#define DISTORTFACTORY 0.4\n";
 

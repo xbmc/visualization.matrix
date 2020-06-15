@@ -10,7 +10,7 @@ void main(void)
     
     //VHS-like distortions
     float wav = texture( iChannel0, vec2((uv.y +1.)*.5,1.0) ).x-.5;
-	float distort = sign(wav) * max(abs(wav)-DISTORTTHRESHOLD,.0);
+	float distort = sign(wav) * max(abs(wav)-cDistortThreshold,.0);
     
     //KODI texture
     float tex = texture(iChannel1, uv+.5-vec2(distort*DISTORTFACTORX,distort*DISTORTFACTORY)).x;

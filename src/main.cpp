@@ -146,7 +146,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
   m_lowpower = kodi::GetSettingBoolean("lowpower");
-  m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.002f)/m_fallSpeed * 0.25f;
+  m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0004f)/m_fallSpeed * 0.25f;
   m_lastAlbumChange = 0.0;
 }
 

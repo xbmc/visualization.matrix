@@ -69,6 +69,7 @@ const std::vector<Preset> g_presets =
    {"Rain with waveform",  30103, "nologowf.frag.glsl", 99, -1,  1, -1},
    {"Clean",               30104, "clean.frag.glsl",    99, -1, -1, -1},
    {"Clean with waveform", 30105, "cleanwf.frag.glsl",  99, -1, -1, -1},
+   {"Kodi VHS",            30100, "kodivhs.frag.glsl",  99,  0,  1, -1},
 };
 
 const std::vector<std::string> g_fileTextures =

@@ -23,12 +23,15 @@ void main(void)
     
     //"interlaced" logo distortion effect
     float line = mod(gv.y*sign(wav),2.);
-    tex *= 1. - (line*10.*abs(distort) + 5.*abs(distort));
+    float distort_abs = abs(distort);
+    tex *= 1. - (line*10.*distort_abs + 5.*distort_abs);
     
-    bw = bw*max(tex,MININTENSITY);
+    //bw = bw*max(tex,MININTENSITY);
+    bw *= tex*.7 + .1;
     
     //brightens lines where distortion are occuring
-	bw += min(abs(distort)*.7,.0105);
+	//bw += min(distort_abs*.7,.0105);
+	bw += distort_abs*.2;
     
     //FFT stuff (visualization)
     //might need some scaling
@@ -39,7 +42,7 @@ void main(void)
     bw=bw+bw*fft*0.4;
     bw += bw*clamp((pow(fft*1.3,2.)-12.),.0,.6);
     bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
-    bw = min(bw,1.99);
+    //bw = min(bw,1.99);
     
     //noise texture
 	bw *= noise(gv);

@@ -118,9 +118,7 @@ private:
   struct
   {
     GLuint vertex_buffer;
-    GLuint vertex_buffer_logo;
     GLuint attr_vertex_e;
-    GLuint attr_vertex_logo;
     GLuint attr_vertex_r, uTexture;
     GLuint effect_fb;
     GLuint framebuffer_texture;

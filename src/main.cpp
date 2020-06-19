@@ -167,16 +167,7 @@ void CVisualizationMatrix::Render()
 {
   if (m_initialized)
   {
-    if (m_state.fbwidth && m_state.fbheight)
-    {
-      RenderTo(m_matrixShader.ProgramHandle(), 0);
-      //RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
-      //RenderTo(m_displayShader.ProgramHandle(), 0);
-    }
-    else
-    {
-      RenderTo(m_matrixShader.ProgramHandle(), 0);
-    }
+    RenderTo(m_matrixShader.ProgramHandle(), 0);
   }
 }
 
@@ -198,20 +189,6 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
   glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
-  //logo vertex
-  static const GLfloat vertex_data_logo[] =
-  {
-    -0.5, 0.5, 0.5, 0.0,
-     0.5, 0.5, 0.5, 0.5,
-     0.5,-0.5, 0.5, 0.5,
-    -0.5,-0.5, 0.5, 0.5,
-  };
-
-  // Upload vertex data to a buffer
-  glGenBuffers(1, &m_state.vertex_buffer_logo);
-  glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer_logo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-
   m_samplesPerSec = iSamplesPerSec;
   Launch(m_currentPreset);
   m_initialized = true;
@@ -228,7 +205,6 @@ void CVisualizationMatrix::Stop()
   UnloadTextures();
 
   glDeleteBuffers(1, &m_state.vertex_buffer);
-  glDeleteBuffers(1, &m_state.vertex_buffer_logo);
 }
 
 

@@ -93,9 +93,17 @@ msgid "Rain with waveform"
 msgstr ""
 
 msgctxt "#30104"
-msgid "Clean rain"
+msgid "Rain with waveform envelope"
 msgstr ""
 
 msgctxt "#30105"
+msgid "Clean rain"
+msgstr ""
+
+msgctxt "#30106"
 msgid "Clean rain with waveform"
+msgstr ""
+
+msgctxt "#30107"
+msgid "Clean rain with waveform envelope"
 msgstr ""

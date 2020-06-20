@@ -63,13 +63,14 @@ struct Preset
 //       as they can cause problems on weaker systems.
 const std::vector<Preset> g_presets =
 {
-   {"Kodi",                30100, "kodi.frag.glsl",     99,  0,  1, -1},
-   {"Album",               30101, "album.frag.glsl",    99, -1,  1,  2},
-   {"Rain only",           30102, "nologo.frag.glsl",   99, -1,  1, -1},
-   {"Rain with waveform",  30103, "nologowf.frag.glsl", 99, -1,  1, -1},
-   {"Clean",               30104, "clean.frag.glsl",    99, -1, -1, -1},
-   {"Clean with waveform", 30105, "cleanwf.frag.glsl",  99, -1, -1, -1},
-   {"Kodi VHS",            30100, "kodivhs.frag.glsl",  99,  0,  1, -1},
+   {"Kodi",                         30100, "kodi.frag.glsl",        99,  0,  1, -1},
+   {"Album",                        30101, "album.frag.glsl",       99, -1,  1,  2},
+   {"Rain only",                    30102, "nologo.frag.glsl",      99, -1,  1, -1},
+   {"Rain with waveform",           30103, "nologowf.frag.glsl",    99, -1,  1, -1},
+   {"Rain with waveform envelope",  30104, "nologowfenv.frag.glsl", 99, -1,  1, -1},
+   {"Clean",                        30105, "clean.frag.glsl",       99, -1, -1, -1},
+   {"Clean with waveform",          30106, "cleanwf.frag.glsl",     99, -1, -1, -1},
+   {"Clean with waveform envelope", 30107, "cleanwfenv.frag.glsl",  99, -1, -1, -1},
 };
 
 const std::vector<std::string> g_fileTextures =
@@ -90,11 +91,13 @@ float waveform(vec2 uv)
   return min(abs(uv.y*20.+wave*10.),0.5);
 }
 
+#ifdef dNoise
 float noise(vec2 gv)
 {
 	//return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize) +iTime*cNoiseFluctuation)).x;
 	return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize))).x;
 }
+#endif
 
 vec3 bw2col(float bw, vec2 uv)
 {
@@ -118,11 +121,13 @@ float waveform(vec2 uv)
   return abs(smoothstep(.225,.275,wave) -.5);
 }
 
+#ifdef dNoise
 float noise(vec2 gv)
 {
 	//return texture(iChannel2, (gv/cResolution*iDotSize*400.33) + iTime*cNoiseFluctuation).x;
   return texture(iChannel2, (gv*.035431) + iTime*cNoiseFluctuation).x;
 }
+#endif
 
 vec3 bw2col(float bw, vec2 uv)
 {
@@ -740,6 +745,7 @@ void CVisualizationMatrix::GatherDefines()
   if (g_presets[m_currentPreset].channel[2] != -1)
   {
     m_defines += "uniform sampler2D iChannel2;\n";
+    m_defines += "#define dNoise\n";
   }
   
   if (g_presets[m_currentPreset].channel[3] != -1)

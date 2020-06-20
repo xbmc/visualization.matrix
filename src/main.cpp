@@ -397,26 +397,8 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     }
 
     float t = intt / 1000.0f;
-    //GLfloat tv[] = { t, t, t, t };
 
-    //glUniform2f(m_attrResolutionLoc, w, h);
     glUniform1f(m_attrGlobalTimeLoc, t);
-    //glUniform1f(m_attrSampleRateLoc, m_samplesPerSec);
-    //glUniform1f(m_attrDotSizeLoc, m_dotSize);
-    //glUniform1fv(m_attrChannelTimeLoc, 4, tv);
-    //glUniform2f(m_state.uScale, static_cast<GLfloat>(Width()) / m_state.fbwidth, static_cast<GLfloat>(Height()) /m_state.fbheight);
-
-    /*
-    time_t now = time(NULL);
-    tm *ltm = localtime(&now);
-
-    float year = 1900 + ltm->tm_year;
-    float month = ltm->tm_mon;
-    float day = ltm->tm_mday;
-    float sec = (ltm->tm_hour * 60 * 60) + (ltm->tm_min * 60) + ltm->tm_sec;
-
-    //glUniform4f(m_attrDateLoc, year, month, day, sec);
-    */
 
     for (int i = 0; i < 4; i++)
     {
@@ -530,42 +512,6 @@ void CVisualizationMatrix::Launch(int preset)
     m_channelTextures[3] = CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   }
 
-  /*
-  for (int i = 1; i < 4; i++)
-  {
-    if (!m_shaderTextures[i].texture.empty())
-    {
-      GLint format = GL_RGBA;
-      GLint scaling = GL_LINEAR;
-      GLint repeat = GL_REPEAT;
-      m_channelTextures[i] = CreateTexture(m_shaderTextures[i].texture, format, scaling, repeat);
-    }
-  }
-  */
-
-  /*
-  const int size1 = 256, size2=512;
-  double t1 = MeasurePerformance(m_usedShaderFile, size1);
-  double t2 = MeasurePerformance(m_usedShaderFile, size2);
-
-  double expected_fps = 40.0;
-  // time per pixel for rendering fragment shader
-  double B = (t2-t1)/(size2*size2-size1*size1);
-  // time to render to screen
-  double A = t2 - size2*size2 * B;
-  // how many pixels get the desired fps
-  double pixels = (1000.0/expected_fps - A) / B;
-  m_state.fbwidth = sqrtf(pixels * Width() / Height());
-  if (m_state.fbwidth >= Width())
-    m_state.fbwidth = 0;
-  else if (m_state.fbwidth < 320)
-    m_state.fbwidth = 320;
-  m_state.fbheight = m_state.fbwidth * Height() / Width();
-
-#ifdef DEBUG_PRINT
-  printf("expected fps=%f, pixels=%f %dx%d (A:%f B:%f t1:%.1f t2:%.1f)\n", expected_fps, pixels, m_state.fbwidth, m_state.fbheight, A, B, t1, t2);
-#endif
-  */
   m_state.fbwidth = Width();
   m_state.fbheight = Height();
   LoadPreset(m_usedShaderFile);
@@ -597,36 +543,15 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 
   GLuint matrixShader = m_matrixShader.ProgramHandle();
 
-  //m_attrResolutionLoc = glGetUniformLocation(matrixShader, "iResolution");//TODO: move to define
   m_attrGlobalTimeLoc = glGetUniformLocation(matrixShader, "iTime");
   m_attrAlbumPositionLoc = glGetUniformLocation(matrixShader, "iAlbumPosition");
   m_attrAlbumRGBLoc = glGetUniformLocation(matrixShader, "iAlbumRGB");
-  //m_attrChannelTimeLoc = glGetUniformLocation(matrixShader, "iChannelTime");
-  //m_attrMouseLoc = glGetUniformLocation(matrixShader, "iMouse");
-  //m_attrDateLoc = glGetUniformLocation(matrixShader, "iDate");
-  //m_attrSampleRateLoc  = glGetUniformLocation(matrixShader, "iSampleRate");
-  //m_attrChannelResolutionLoc = glGetUniformLocation(matrixShader, "iChannelResolution");
   m_attrChannelLoc[0] = glGetUniformLocation(matrixShader, "iChannel0");
   m_attrChannelLoc[1] = glGetUniformLocation(matrixShader, "iChannel1");
   m_attrChannelLoc[2] = glGetUniformLocation(matrixShader, "iChannel2");
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
-  //m_attrDotSizeLoc = glGetUniformLocation(matrixShader, "iDotSize");//TODO: move to define
 
-  //m_state.uScale = glGetUniformLocation(matrixShader, "uScale");
   m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");
-  /*
-  std::string vertShader = kodi::GetAddonPath("resources/shaders/main_display_" GL_TYPE_STRING ".vert.glsl");
-  std::string fraqShader = kodi::GetAddonPath("resources/shaders/main_display_" GL_TYPE_STRING ".frag.glsl");
-  if (!m_displayShader.LoadShaderFiles(vertShader, fraqShader) ||
-      !m_displayShader.CompileAndLink())
-  {
-    kodi::Log(ADDON_LOG_ERROR, "Failed to compile main shaders");
-    return;
-  }
-
-  m_state.uTexture = glGetUniformLocation(m_displayShader.ProgramHandle(), "uTexture");
-  m_state.attr_vertex_r = glGetAttribLocation(m_displayShader.ProgramHandle(), "vertex");
-  */
 
   // Prepare a texture to render to
   glActiveTexture(GL_TEXTURE0);
@@ -699,38 +624,10 @@ GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint intern
 {
   kodi::Log(ADDON_LOG_DEBUG, "creating texture %s\n", file.c_str());
 
-  
-  /*
-  unsigned error;
-  unsigned char* image;
-  unsigned width, height;
-
-  error = lodepng_decode32_file(&image, &width, &height, file.c_str());
-  if (error)
-  {
-    kodi::Log(ADDON_LOG_ERROR, "lodepng_decode32_file error %u: %s", error, lodepng_error_text(error));
-    return 0;
-  }
-
-
-  GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
-  free(image);
-  */
   int width,height,n;
-  //n = 1;
   unsigned char* image;
   stbi_set_flip_vertically_on_load(true);
-  /*
-  if (internalFormat == GL_RED)
-  {
-    image = stbi_load(file.c_str(), &height, &width, &n, STBI_grey);
-  }
-  else
-  {
-    image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
-  }
-  */
-
+  
   image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
   if (image == nullptr)
   {
@@ -797,32 +694,6 @@ int CVisualizationMatrix::DetermineBitsPrecision()
   UnloadPreset();
   return bits;
 }
-/*
-
-double CVisualizationMatrix::MeasurePerformance(const std::string& shaderPath, int size)
-{
-  int iterations = -1;
-  m_state.fbwidth = m_state.fbheight = size;
-  LoadPreset(shaderPath);
-
-  int64_t end, start;
-  do
-  {
-    RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
-    RenderTo(m_displayShader.ProgramHandle(), m_state.effect_fb);
-    glFinish();
-    if (++iterations == 0)
-      start = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0);
-    end = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0);
-  } while (end - start < 50);
-  double t = (double)(end - start)/iterations;
-#ifdef DEBUG_PRINT
-  printf("%s %dx%d %.1fms = %.2f fps\n", __func__, size, size, t, 1000.0/t);
-#endif
-  UnloadPreset();
-  return t;
-}
-*/
 
 void CVisualizationMatrix::GatherDefines()
 {
@@ -891,7 +762,6 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#define INTENSITY 1.0\n";
   m_defines += "#define MININTENSITY 0.075\n";
 
-  //m_defines += "#define DISTORTTHRESHOLD 0.4\n";
   m_defines += "#define DISTORTFACTORX 0.6\n";
   m_defines += "#define DISTORTFACTORY 0.4\n";
 

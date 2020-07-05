@@ -19,7 +19,6 @@
  */
 
 #include "main.h"
-#include "lodepng.h"
 
 #include <regex>
 
@@ -29,8 +28,7 @@
 #define STBI_ONLY_BMP
 #include "stb_image.h"
 #include "kodi/Filesystem.h"
-#include "kodi/libXBMC_addon.h"
-#include <kodi/General.h>
+#include "kodi/General.h"
 
 
 

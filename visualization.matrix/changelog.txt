@@ -1,3 +1,4 @@
+- Fix Debian build code
 - Add license file, add license and source URL to addon.xml
 0.4.2
 - Pre-Relese version for Kodi Matrix

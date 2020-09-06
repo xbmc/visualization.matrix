@@ -1,3 +1,6 @@
+0.5.0
+- Visualization API change related version update
+- Fix standalone build with newer glm versions (>= 0.9.9.6)
 - Fix Debian build code
 - Add license file, add license and source URL to addon.xml
 0.4.2

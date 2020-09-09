@@ -1,3 +1,4 @@
+- Add license file, add license and source URL to addon.xml
 0.4.2
 - Pre-Relese version for Kodi Matrix
 0.2.0

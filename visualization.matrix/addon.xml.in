@@ -12,6 +12,8 @@
     <summary lang="en_GB">Matrix inspired visualization for Kodi.</summary>
     <description lang="en_GB">This music visualization is inspired by the movie "Matrix". It features eight presets.</description>
     <platform>@PLATFORM@</platform>
+    <license>GPL-2.0-or-later</license>
+    <source>https://github.com/xbmc/visualization.matrix</source>
     <assets>
       <icon>resources/icon.jpg</icon>
       <fanart>resources/fanart.jpg</fanart>

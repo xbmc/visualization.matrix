@@ -48,7 +48,7 @@ struct Preset
 //       as they can cause problems on weaker systems.
 const std::vector<Preset> g_presets =
 {
-   {"Kodi",                         30100, "kodi.frag.glsl",        99,  0,  1, -1},
+   {"Kodi",                         30100, "logo.frag.glsl",        99,  0,  1, -1},
    {"Album",                        30101, "album.frag.glsl",       99, -1,  1,  2},
    {"Rain only",                    30102, "nologo.frag.glsl",      99, -1,  1, -1},
    {"Rain with waveform",           30103, "nologowf.frag.glsl",    99, -1,  1, -1},
@@ -67,7 +67,7 @@ const std::vector<std::string> g_fileTextures =
 std::string fsCommonFunctionsLowPower = 
 R"functions(float h11(float p)
 {
-  return fract(fract(p * .1031) * (p + 33.33));
+  return fract(.13 * p + 217943.37373737 / (p + 0.31));
 }
 
 float waveform(vec2 uv)
@@ -79,8 +79,7 @@ float waveform(vec2 uv)
 #ifdef dNoise
 float noise(vec2 gv)
 {
-	//return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize) +iTime*cNoiseFluctuation)).x;
-	return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*iDotSize))).x;
+	return texture(iChannel2, vec2(gl_FragCoord.xy/(256.*cDotSize))).x;
 }
 #endif
 
@@ -92,12 +91,18 @@ vec3 bw2col(float bw, vec2 uv)
   return (basecolor*cColor+peakcolor)*bw;
 }
 
+vec2 getUV()
+{
+  vec2 uv = (gl_FragCoord.xy-0.5*cResolution.xy)/cResolution.y;
+  return uv;
+}
+
 )functions";
 
 std::string fsCommonFunctionsNormal = 
 R"functions(float h11(float p)
 {
-  return fract(20.12345+sin(p*RNDSEED1)*RNDSEED2);
+  return fract(20.12345+sin(p*cRNDSEED1)*cRNDSEED2);
 }
 
 float waveform(vec2 uv)
@@ -109,7 +114,6 @@ float waveform(vec2 uv)
 #ifdef dNoise
 float noise(vec2 gv)
 {
-	//return texture(iChannel2, (gv/cResolution*iDotSize*400.33) + iTime*cNoiseFluctuation).x;
   return texture(iChannel2, (gv*.035431) + iTime*cNoiseFluctuation).x;
 }
 #endif
@@ -122,6 +126,21 @@ vec3 bw2col(float bw, vec2 uv)
   return basecolor*cColor+peakcolor;
 }
 
+#ifdef dCrtCurve
+vec2 getUV()
+{
+  vec2 uv = (gl_FragCoord.xy-0.5*cResolution.xy)/cResolution.y;
+  uv = uv / (1.00 - length(uv*.1));
+  return uv;
+}
+#else
+vec2 getUV()
+{
+  vec2 uv = (gl_FragCoord.xy-0.5*cResolution.xy)/cResolution.y;
+  return uv;
+}
+#endif
+
 )functions";
 
 CVisualizationMatrix::CVisualizationMatrix()
@@ -131,7 +150,17 @@ CVisualizationMatrix::CVisualizationMatrix()
     m_pcm(new float[AUDIO_BUFFER]())
 {
   m_currentPreset = kodi::GetSettingInt("lastpresetidx");
-  m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
+  m_dotMode = static_cast<float>(kodi::GetSettingBoolean("dotmode"));
+  if (m_dotMode)
+  {
+    m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
+  }
+  else
+  {
+    if (Height() <= 900) m_dotSize = 3.;
+    else if (Height() <= 1500) m_dotSize = 4.;
+    else  m_dotSize = 5.;
+  }
   m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
   m_distortThreshold = static_cast<float>(kodi::GetSettingInt("distortthreshold")) * .005;
   m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
@@ -139,6 +168,7 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
   m_lowpower = kodi::GetSettingBoolean("lowpower");
   m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0004f)/m_fallSpeed * 0.25f;
+  m_crtCurve = kodi::GetSettingBoolean("crtcurve");
   m_lastAlbumChange = 0.0;
 }
 
@@ -702,7 +732,14 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "#ifndef texture\n#define texture texture2D\n#endif\n\n";
 #endif
 
-  m_defines += "const float iDotSize = " + std::to_string(m_dotSize) + ";\n";//TODO remove from shaders
+  m_defines += "const float cRNDSEED1 = 170.12;\n";
+  m_defines += "const float cRNDSEED2 = 7572.1;\n";
+  m_defines += "const float cINTENSITY = 1.0;\n";
+  m_defines += "const float cMININTENSITY = 0.075;\n";
+  m_defines += "const float cDISTORTFACTORX = 0.6;\n";
+  m_defines += "const float cDISTORTFACTORY = 0.4;\n";
+  m_defines += "const float cVIGNETTEINTENSITY = 0.05;\n";
+
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
   m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
   m_defines += "const float cNoiseFluctuation = " + std::to_string(m_noiseFluctuation) + ";\n";
@@ -712,12 +749,10 @@ void CVisualizationMatrix::GatherDefines()
   if (m_state.fbwidth && m_state.fbheight)
   {
     m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";
-    m_defines += "const vec2 iResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";//TODO remove from shaders
   }
   else
   {
     m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";
-    m_defines += "const vec2 iResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";//TODO remove from shaders
   }
 
   m_defines += "uniform sampler2D iChannel0;\n";
@@ -744,19 +779,12 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += "uniform vec3 iAlbumRGB;\n";
   }
 
+  if (m_crtCurve)
+  {
+    m_defines += "#define dCrtCurve\n";
+  }
+
   m_defines += "uniform float iTime;\n";
-
-  //TODO: make pretty
-  m_defines += "#define RNDSEED1 170.12\n";
-  m_defines += "#define RNDSEED2 7572.1\n";
-
-  m_defines += "#define INTENSITY 1.0\n";
-  m_defines += "#define MININTENSITY 0.075\n";
-
-  m_defines += "#define DISTORTFACTORX 0.6\n";
-  m_defines += "#define DISTORTFACTORY 0.4\n";
-
-  m_defines += "#define VIGNETTEINTENSITY 0.05\n";
 
   if (m_lowpower)
   {

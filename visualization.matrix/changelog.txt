@@ -1,3 +1,9 @@
+1.0.0
+- Extended available presets
+- Added addidtional customization settings
+- Added setting for platforms with low performance
+- General performance improvements
+- Added German translation
 0.5.0
 - Visualization API change related version update
 - Fix standalone build with newer glm versions (>= 0.9.9.6)

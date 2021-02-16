@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="visualization.matrix"
-  version="0.5.0"
+  version="1.0.0"
   name="Matrix"
   provider-name="Sarbes">
   <requires>@ADDON_DEPENDS@</requires>

@@ -2,7 +2,7 @@
 void main(void)
 {
     //general stuff
-    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.y;
+    vec2 uv = getUV();
     
     //rain
     vec2 gv = floor(uv*cColumns);
@@ -28,13 +28,13 @@ void main(void)
 	bw *= noise(gv);
 
 	//vignette effect
-	float vignette = length(uv)*VIGNETTEINTENSITY;
+	float vignette = length(uv)*cVIGNETTEINTENSITY;
 	bw -= vignette;
 	
     //pseudo pixels (dots)
     vec3 col = bw2col(bw,uv);
 
-    col *= INTENSITY;   
+    col *= cINTENSITY;   
     //col.gb = vec2(0.);
     //col.r = wave; 
     

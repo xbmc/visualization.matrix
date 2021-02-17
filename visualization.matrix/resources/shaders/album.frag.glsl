@@ -1,7 +1,7 @@
 void main(void)
 {
     //general stuff
-    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.y;
+    vec2 uv = getUV();
     
     //rain
     vec2 gv = floor(uv*cColumns);
@@ -13,11 +13,11 @@ void main(void)
 	float distort = sign(wav) * max(abs(wav)-cDistortThreshold,.0);
 
     //Album texture
-    //vec2 albumcoords = (fragCoord*2.)/iResolution.y;
-    //albumcoords += vec2(-2.*iResolution.x/iResolution.y+1.,-1.)*vec2(fract(tick*1234.4321),fract(tick*5678.8765));
+    //vec2 albumcoords = (fragCoord*2.)/cResolution.y;
+    //albumcoords += vec2(-2.*cResolution.x/cResolution.y+1.,-1.)*vec2(fract(tick*1234.4321),fract(tick*5678.8765));
 
     vec2 albumcoords = uv*iAlbumPosition.z + iAlbumPosition.xy;
-    albumcoords -= distort*vec2(DISTORTFACTORX,DISTORTFACTORY);
+    albumcoords -= distort*vec2(cDISTORTFACTORX,cDISTORTFACTORY);
 
     vec3 album = texture(iChannel3, albumcoords).rgb;
     //thanks GLES 2.0 for not having clamping to border
@@ -36,7 +36,7 @@ void main(void)
     tex *= 1. - (line*10.*abs(distort) + 5.*abs(distort));
     
     //limit overall intensity
-    bw = bw*max(tex,MININTENSITY);
+    bw = bw*max(tex,cMININTENSITY);
     
     //brightens lines where distortion are occuring
 	bw += min(abs(distort)*.7,.0105);
@@ -47,22 +47,22 @@ void main(void)
     fft *= (3.2 -abs(0.-uv.x*1.3))*0.75;
     fft *= 1.8;
     
-    bw=bw+bw*fft*0.4;
-    bw += bw*clamp((pow(fft*1.3,2.)-12.),.0,.6);
-    bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
+    bw=bw+bw*fft*0.4*cRainHighlights;
+    bw += bw*clamp((pow(fft*1.3*cRainHighlights,2.)-12.),.0,.6);
+    bw += bw*clamp((pow(fft*1.0*cRainHighlights,3.)-23.),.0,.7);
     bw = min(bw,1.99);
     
     //noise texture
 	bw *= noise(gv);
 
 	//vignette effect
-	float vignette = length(uv)*VIGNETTEINTENSITY;
+	float vignette = length(uv)*cVIGNETTEINTENSITY;
 	bw -= vignette;
 	
     //pseudo pixels (dots)
     vec3 col = bw2col(bw,uv);
 
-    col *= INTENSITY;
+    col *= cINTENSITY;
 
     FragColor = vec4(col,1.0);
 }

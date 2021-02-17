@@ -1,7 +1,7 @@
 void main(void)
 {
     //general stuff
-    vec2 uv = (gl_FragCoord.xy-0.5*iResolution.xy)/iResolution.y;
+    vec2 uv = getUV();
     
     //rain
     vec2 gv = floor(uv*cColumns);
@@ -13,7 +13,7 @@ void main(void)
 	float distort = sign(wav) * max(abs(wav)-cDistortThreshold,.0);
     
     //KODI texture
-    float tex = texture(iChannel1, uv+.5-vec2(distort*DISTORTFACTORX,distort*DISTORTFACTORY)).x;
+    float tex = texture(iChannel1, uv+.5-vec2(distort*cDISTORTFACTORX,distort*cDISTORTFACTORY)).x;
     //float tex = texture(iChannel1, uv+.5-vec2(distort,distort)).x;
     //float tex = texture(iChannel1, uv+.5).x;
     tex *= .9 - wav*.2;
@@ -26,7 +26,7 @@ void main(void)
     float distort_abs = abs(distort);
     tex *= 1. - (line*10.*distort_abs + 5.*distort_abs);
     
-    //bw = bw*max(tex,MININTENSITY);
+    //bw = bw*max(tex,cMININTENSITY);
     bw *= tex*.7 + .1;
     
     //brightens lines where distortion are occuring
@@ -39,22 +39,22 @@ void main(void)
     fft *= (3.2 -abs(0.-uv.x*1.3))*0.75;
     fft *= 1.8;
     
-    bw=bw+bw*fft*0.4;
-    bw += bw*clamp((pow(fft*1.3,2.)-12.),.0,.6);
-    bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
+    bw=bw+bw*fft*0.4*cRainHighlights;
+    bw += bw*clamp((pow(fft*1.3*cRainHighlights,2.)-12.),.0,.6);
+    bw += bw*clamp((pow(fft*1.0*cRainHighlights,3.)-23.),.0,.7);
     //bw = min(bw,1.99);
     
     //noise texture
 	bw *= noise(gv);
 
 	//vignette effect
-	float vignette = length(uv)*VIGNETTEINTENSITY;
+	float vignette = length(uv)*cVIGNETTEINTENSITY;
 	bw -= vignette;
 	
     //pseudo pixels (dots)
     vec3 col = bw2col(bw,uv);
     
-    //col *= INTENSITY;
+    //col *= cINTENSITY;
     
     FragColor = vec4(col,1.0);
 }

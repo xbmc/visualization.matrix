@@ -52,7 +52,7 @@
           </dependencies>
         </setting>
         <setting id="distortthreshold" type="integer" label="30007" help="30008">
-          <default>80</default>
+          <default>60</default>
           <constraints>
             <minimum>1</minimum>
             <step>1</step>
@@ -63,7 +63,7 @@
           </control>
         </setting>
         <setting id="rainhighlights" type="integer" label="30011" help="30012">
-          <default>75</default>
+          <default>70</default>
           <constraints>
             <minimum>0</minimum>
             <step>1</step>

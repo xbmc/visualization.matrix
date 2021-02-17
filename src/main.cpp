@@ -394,9 +394,9 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
       {
         double logotimer = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         float delta = static_cast<float>(logotimer - m_lastAlbumChange)*0.6f;
-        GLfloat r = std::max(sin(delta),0.0f)*0.7f;
-        GLfloat g = std::max(sin(delta - 1.0f),0.0f)*0.7f;
-        GLfloat b = std::max(sin(delta - 2.0f),0.0f)*0.7f;
+        GLfloat r = std::max(static_cast<float>(sin(delta)),0.0f)*0.7f;
+        GLfloat g = std::max(static_cast<float>(sin(delta - 1.0f)),0.0f)*0.7f;
+        GLfloat b = std::max(static_cast<float>(sin(delta - 2.0f)),0.0f)*0.7f;
         glUniform3f(m_attrAlbumRGBLoc, r, g, b);
         if (m_lastAlbumChange == 0.0)
         {

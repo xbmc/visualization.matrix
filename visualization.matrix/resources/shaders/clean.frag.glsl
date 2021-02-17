@@ -16,6 +16,8 @@ void main(void)
     bw += bw*clamp((pow(fft*1.3*cRainHighlights,2.)-12.),.0,.6);
     bw += bw*clamp((pow(fft*1.0*cRainHighlights,3.)-23.),.0,.7);
     bw = min(bw,1.99);
+
+    bw -= .4;
     
     //pseudo pixels (dots)
     vec3 col = bw2col(bw,uv);

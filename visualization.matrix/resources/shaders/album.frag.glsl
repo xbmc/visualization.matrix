@@ -47,9 +47,9 @@ void main(void)
     fft *= (3.2 -abs(0.-uv.x*1.3))*0.75;
     fft *= 1.8;
     
-    bw=bw+bw*fft*0.4;
-    bw += bw*clamp((pow(fft*1.3,2.)-12.),.0,.6);
-    bw += bw*clamp((pow(fft*1.0,3.)-23.),.0,.7);
+    bw=bw+bw*fft*0.4*cRainHighlights;
+    bw += bw*clamp((pow(fft*1.3*cRainHighlights,2.)-12.),.0,.6);
+    bw += bw*clamp((pow(fft*1.0*cRainHighlights,3.)-23.),.0,.7);
     bw = min(bw,1.99);
     
     //noise texture

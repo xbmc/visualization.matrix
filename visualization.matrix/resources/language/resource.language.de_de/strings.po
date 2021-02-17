@@ -60,6 +60,14 @@ msgctxt "#30010"
 msgid "Erlaubt das manuelle Setzen der Pixelgröße."
 msgstr ""
 
+msgctxt "#30011"
+msgid "Hervorhebung einzelner Regentropfen"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Bestimmt die Intensität einzelner Regentropfen bei lauten Klangphasen."
+msgstr ""
+
 msgctxt "#30050"
 msgid "Rot"
 msgstr ""

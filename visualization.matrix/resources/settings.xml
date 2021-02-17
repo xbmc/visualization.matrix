@@ -62,6 +62,17 @@
             <popup>false</popup>
           </control>
         </setting>
+        <setting id="rainhighlights" type="integer" label="30011" help="30012">
+          <default>75</default>
+          <constraints>
+            <minimum>0</minimum>
+            <step>1</step>
+            <maximum>100</maximum>
+          </constraints>
+          <control type="slider" format="integer">
+            <popup>false</popup>
+          </control>
+        </setting>
         <setting id="red" type="integer" label="30050" help="30053">
           <default>51</default>
           <constraints>

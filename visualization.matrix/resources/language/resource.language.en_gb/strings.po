@@ -60,6 +60,14 @@ msgctxt "#30010"
 msgid "Enables the manual setting of the size of the dots."
 msgstr ""
 
+msgctxt "#30011"
+msgid "Strength of rain highlights"
+msgstr ""
+
+msgctxt "#30012"
+msgid "Sets the colour intensity of individual raindrops at music peaks."
+msgstr ""
+
 msgctxt "#30050"
 msgid "Red"
 msgstr ""

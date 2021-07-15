@@ -9,10 +9,6 @@
     point="xbmc.player.musicviz"
     library_@PLATFORM@="@LIBRARY_FILENAME@"/>
   <extension point="xbmc.addon.metadata">
-    <summary lang="en_GB">Matrix inspired visualization for Kodi.</summary>
-    <summary lang="de_DE">Von "Matrix" inspirierte Musikvisualierung für Kodi.</summary>
-    <description lang="en_GB">This music visualization is inspired by the movie "Matrix". It features eight presets.</description>
-    <description lang="de_DE">Diese Musikvisualisierung wurde durch den Film "Matrix" inspiriert. Sie bietet acht verschiedene Presets.</description>
     <platform>@PLATFORM@</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/xbmc/visualization.matrix</source>
@@ -20,5 +16,9 @@
       <icon>resources/icon.jpg</icon>
       <fanart>resources/fanart.jpg</fanart>
     </assets>
+    <summary lang="de_DE">Von "Matrix" inspirierte Musikvisualierung für Kodi.</summary>
+    <summary lang="en_GB">Matrix inspired visualization for Kodi.</summary>
+    <description lang="de_DE">Diese Musikvisualisierung wurde durch den Film "Matrix" inspiriert. Sie bietet acht verschiedene Presets.</description>
+    <description lang="en_GB">This music visualization is inspired by the movie "Matrix". It features eight presets.</description>
   </extension>
 </addon>

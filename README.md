@@ -20,7 +20,7 @@ The following instructions assume you will have built Kodi already in the `kodi-
 suggested by the README.
 
 1. `git clone --branch master https://github.com/xbmc/xbmc.git`
-2. `git clone --branch Matrix https://github.com/xbmc/visualization.matrix.git`
+2. `git clone --branch Nexus https://github.com/xbmc/visualization.matrix.git`
 3. `cd visualization.matrix && mkdir build && cd build`
 4. `cmake -DADDONS_TO_BUILD=visualization.matrix -DADDON_SRC_PREFIX=../.. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=../../xbmc/kodi-build/addons -DPACKAGE_ZIP=1 ../../xbmc/cmake/addons`
 5. `make`

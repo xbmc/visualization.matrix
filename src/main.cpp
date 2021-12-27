@@ -149,11 +149,11 @@ CVisualizationMatrix::CVisualizationMatrix()
     m_magnitudeBuffer(new float[NUM_BANDS]()),
     m_pcm(new float[AUDIO_BUFFER]())
 {
-  m_currentPreset = kodi::GetSettingInt("lastpresetidx");
-  m_dotMode = static_cast<float>(kodi::GetSettingBoolean("dotmode"));
+  m_currentPreset = kodi::addon::GetSettingInt("lastpresetidx");
+  m_dotMode = static_cast<float>(kodi::addon::GetSettingBoolean("dotmode"));
   if (m_dotMode)
   {
-    m_dotSize = static_cast<float>(kodi::GetSettingInt("dotsize"));
+    m_dotSize = static_cast<float>(kodi::addon::GetSettingInt("dotsize"));
   }
   else
   {
@@ -161,15 +161,15 @@ CVisualizationMatrix::CVisualizationMatrix()
     else if (Height() <= 1500) m_dotSize = 4.;
     else  m_dotSize = 5.;
   }
-  m_fallSpeed = static_cast<float>(kodi::GetSettingInt("fallspeed")) * .01;
-  m_distortThreshold = static_cast<float>(kodi::GetSettingInt("distortthreshold")) * .005;
-  m_rainHighlights = static_cast<float>(kodi::GetSettingInt("rainhighlights")) * .016;
-  m_dotColor.red = static_cast<float>(kodi::GetSettingInt("red")) / 255.f;
-  m_dotColor.green = static_cast<float>(kodi::GetSettingInt("green")) / 255.f;
-  m_dotColor.blue = static_cast<float>(kodi::GetSettingInt("blue")) / 255.f;
-  m_lowpower = kodi::GetSettingBoolean("lowpower");
-  m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::GetSettingInt("noisefluctuation")) * 0.0004f)/m_fallSpeed * 0.25f;
-  m_crtCurve = kodi::GetSettingBoolean("crtcurve");
+  m_fallSpeed = static_cast<float>(kodi::addon::GetSettingInt("fallspeed")) * .01;
+  m_distortThreshold = static_cast<float>(kodi::addon::GetSettingInt("distortthreshold")) * .005;
+  m_rainHighlights = static_cast<float>(kodi::addon::GetSettingInt("rainhighlights")) * .016;
+  m_dotColor.red = static_cast<float>(kodi::addon::GetSettingInt("red")) / 255.f;
+  m_dotColor.green = static_cast<float>(kodi::addon::GetSettingInt("green")) / 255.f;
+  m_dotColor.blue = static_cast<float>(kodi::addon::GetSettingInt("blue")) / 255.f;
+  m_lowpower = kodi::addon::GetSettingBoolean("lowpower");
+  m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0004f)/m_fallSpeed * 0.25f;
+  m_crtCurve = kodi::addon::GetSettingBoolean("crtcurve");
   m_lastAlbumChange = 0.0;
 }
 
@@ -273,7 +273,7 @@ bool CVisualizationMatrix::NextPreset()
   m_currentPreset = (m_currentPreset + 1) % g_presets.size();
   Launch(m_currentPreset);
   UpdateAlbumart();
-  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
+  kodi::addon::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
@@ -282,7 +282,7 @@ bool CVisualizationMatrix::PrevPreset()
   m_currentPreset = (m_currentPreset - 1) % g_presets.size();
   Launch(m_currentPreset);
   UpdateAlbumart();
-  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
+  kodi::addon::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
@@ -292,7 +292,7 @@ bool CVisualizationMatrix::LoadPreset(int select)
   m_currentPreset = select % g_presets.size();
   Launch(m_currentPreset);
   UpdateAlbumart();
-  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
+  kodi::addon::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
@@ -301,7 +301,7 @@ bool CVisualizationMatrix::RandomPreset()
   m_currentPreset = (int)((std::rand() / (float)RAND_MAX) * g_presets.size());
   Launch(m_currentPreset);
   UpdateAlbumart();
-  kodi::SetSettingInt("lastpresetidx", m_currentPreset);
+  kodi::addon::SetSettingInt("lastpresetidx", m_currentPreset);
   return true;
 }
 
@@ -313,7 +313,7 @@ bool CVisualizationMatrix::GetPresets(std::vector<std::string>& presets)
   std::string name;
   for (auto preset : g_presets)
   {
-    name = kodi::GetLocalizedString(preset.labelId, preset.name);
+    name = kodi::addon::GetLocalizedString(preset.labelId, preset.name);
     presets.push_back(name);
   }
   return true;
@@ -357,7 +357,7 @@ bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
     return true;
   }
 
-  m_channelTextures[3] = CreateTexture(kodi::GetAddonPath("resources/textures/logo.png"), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+  m_channelTextures[3] = CreateTexture(kodi::addon::GetAddonPath("resources/textures/logo.png"), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   
   return false;
 }
@@ -498,12 +498,12 @@ void CVisualizationMatrix::Launch(int preset)
 
   UnloadTextures();
 
-  m_usedShaderFile = kodi::GetAddonPath("resources/shaders/" + g_presets[preset].file);
+  m_usedShaderFile = kodi::addon::GetAddonPath("resources/shaders/" + g_presets[preset].file);
   for (int i = 0; i < 4; i++)
   {
     if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < static_cast< int > (g_fileTextures.size()))
     {
-      m_shaderTextures[i].texture = kodi::GetAddonPath("resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
+      m_shaderTextures[i].texture = kodi::addon::GetAddonPath("resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
     }
     else if (g_presets[preset].channel[i] == 99) // framebuffer
     {
@@ -554,7 +554,7 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 {
   UnloadPreset();
   GatherDefines();
-  std::string vertMatrixShader = kodi::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
+  std::string vertMatrixShader = kodi::addon::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
   if (!m_matrixShader.LoadShaderFiles(vertMatrixShader, shaderPath) ||
       !m_matrixShader.CompileAndLink("", "", m_defines, ""))
   {
@@ -694,7 +694,7 @@ float CVisualizationMatrix::LinearToDecibels(float linear)
 int CVisualizationMatrix::DetermineBitsPrecision()
 {
   m_state.fbwidth = 32, m_state.fbheight = 26*10;
-  LoadPreset(kodi::GetAddonPath("resources/shaders/main_test.frag.glsl"));
+  LoadPreset(kodi::addon::GetAddonPath("resources/shaders/main_test.frag.glsl"));
   RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
   glFinish();
 

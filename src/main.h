@@ -15,7 +15,7 @@
 
 #include "kissfft/kiss_fft.h"
 
-class ATTRIBUTE_HIDDEN CVisualizationMatrix
+class ATTR_DLL_LOCAL CVisualizationMatrix
   : public kodi::addon::CAddonBase
   , public kodi::addon::CInstanceVisualization
 {

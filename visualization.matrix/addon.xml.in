@@ -21,6 +21,7 @@
     <summary lang="en_GB">Matrix inspired visualization for Kodi.</summary>
     <summary lang="es_ES">Visualización para Kodi inspirada en Matrix.</summary>
     <summary lang="es_MX">Visualización inspirada en Matrix para Kodi.</summary>
+    <summary lang="fi_FI">Matrix-elokuvan inspiroima Kodi-visualisointi.</summary>
     <summary lang="ru_RU">Визуализация для Kodi, вдохновлённая Матрицей.</summary>
     <summary lang="zh_CN">受矩阵启发的KODI可视化。</summary>
     <description lang="da_DK">Denne musikvisualisering er inspireret af filmen &quot;Matrix&quot;. Den har otte forudindstillinger.</description>
@@ -28,6 +29,7 @@
     <description lang="en_GB">This music visualization is inspired by the movie &quot;Matrix&quot;. It features eight presets.</description>
     <description lang="es_ES">Esta visualización de música está inspirada en la película &quot;Matrix&quot;. Tiene ocho preajustes.</description>
     <description lang="es_MX">Esta visualización musical está inspirada en la película &quot;Matrix&quot;. Contiene 8 preajustes.</description>
+    <description lang="fi_FI">Äänivisualisointi, joka on &quot;The Matrix&quot; -elokuvan inspiroima. Se sisältää kahdeksan esiasetusta.</description>
     <description lang="ru_RU">Эта визуализация для аудиоплеера вдохновлена фильмом &quot;Матрица&quot;. Она включает восемь предустановок.</description>
     <description lang="zh_CN">这次音乐可视化的灵感来自电影《黑客帝国》。它有八个预置。</description>
   </extension>

@@ -23,9 +23,9 @@ public:
   CVisualizationMatrix();
   ~CVisualizationMatrix() override;
 
-  bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
+  bool Start(int channels, int samplesPerSec, int bitsPerSample, const std::string& songName) override;
   void Stop() override;
-  void AudioData(const float* audioData, int audioDataLength, float* freqData, int freqDataLength) override;
+  void AudioData(const float* audioData, size_t audioDataLength) override;
   void Render() override;
   bool GetPresets(std::vector<std::string>& presets) override;
   int GetActivePreset() override;
@@ -33,7 +33,7 @@ public:
   bool NextPreset() override;
   bool LoadPreset(int select) override;
   bool RandomPreset() override;
-  bool UpdateAlbumart(std::string albumart) override;
+  bool UpdateAlbumart(const std::string& albumart) override;
 
 private:
   void RenderTo(GLuint shader, GLuint effect_fb);

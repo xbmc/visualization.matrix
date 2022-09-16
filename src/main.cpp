@@ -192,7 +192,7 @@ void CVisualizationMatrix::Render()
   }
 }
 
-bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, std::string szSongName)
+bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const std::string& szSongName)
 {
   kodi::Log(ADDON_LOG_DEBUG, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
 
@@ -229,7 +229,7 @@ void CVisualizationMatrix::Stop()
 }
 
 
-void CVisualizationMatrix::AudioData(const float* pAudioData, int iAudioDataLength, float* pFreqData, int iFreqDataLength)
+void CVisualizationMatrix::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
   WriteToBuffer(pAudioData, iAudioDataLength, 2);
 
@@ -332,7 +332,7 @@ bool CVisualizationMatrix::UpdateAlbumart()
   return CVisualizationMatrix::UpdateAlbumart(m_albumArt);
 }
 
-bool CVisualizationMatrix::UpdateAlbumart(std::string albumart)
+bool CVisualizationMatrix::UpdateAlbumart(const std::string& albumart)
 {
   m_albumArt = albumart;
 

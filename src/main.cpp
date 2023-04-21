@@ -145,7 +145,7 @@ vec2 getUV()
 
 CVisualizationMatrix::CVisualizationMatrix()
   : m_kissCfg(kiss_fft_alloc(AUDIO_BUFFER, 0, nullptr, nullptr)),
-    m_audioData(new GLubyte[AUDIO_BUFFER]()),
+    m_audioData(AUDIO_BUFFER),
     m_magnitudeBuffer(new float[NUM_BANDS]()),
     m_pcm(new float[AUDIO_BUFFER]())
 {
@@ -175,7 +175,6 @@ CVisualizationMatrix::CVisualizationMatrix()
 
 CVisualizationMatrix::~CVisualizationMatrix()
 {
-  delete [] m_audioData;
   delete [] m_magnitudeBuffer;
   delete [] m_pcm;
   free(m_kissCfg);
@@ -384,7 +383,7 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
         {
           glActiveTexture(GL_TEXTURE0 + i);
           glBindTexture(GL_TEXTURE_2D, m_channelTextures[i]);
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, NUM_BANDS, 2, 0, GL_RED, GL_UNSIGNED_BYTE, m_audioData);
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, NUM_BANDS, 2, 0, GL_RED, GL_UNSIGNED_BYTE, m_audioData.data());
         }
       }
       m_needsUpload = false;
@@ -516,7 +515,7 @@ void CVisualizationMatrix::Launch(int preset)
     }
   }
   // Audio
-  m_channelTextures[0] = CreateTexture(GL_RED, NUM_BANDS, 2, m_audioData);
+  m_channelTextures[0] = CreateTexture(GL_RED, NUM_BANDS, 2, m_audioData.data());
   // Logo
   if (!m_shaderTextures[1].texture.empty())
   {

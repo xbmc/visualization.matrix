@@ -55,8 +55,8 @@ private:
   //double MeasurePerformance(const std::string& shaderPath, int size);
 
   kiss_fft_cfg m_kissCfg;
-  GLubyte* m_audioData;
-  float* m_magnitudeBuffer;
+  std::vector<GLubyte> m_audioData;
+  std::vector<float> m_magnitudeBuffer;
   float* m_pcm;
 
   bool m_initialized = false;

@@ -22,11 +22,9 @@ public:
   CVisualizationMatrix();
   ~CVisualizationMatrix() override;
 
-  bool Start(int channels,
-             int samplesPerSec,
-             int bitsPerSample,
-             const std::string& songName) override;
-  void Stop() override;
+  bool Init() override;
+  void DeInit() override;
+  bool AudioStart(int channels, int samplesPerSec, int bitsPerSample) override;
   void AudioData(const float* audioData, size_t audioDataLength) override;
   void Render() override;
   bool GetPresets(std::vector<std::string>& presets) override;

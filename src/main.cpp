@@ -193,14 +193,8 @@ void CVisualizationMatrix::Render()
   }
 }
 
-bool CVisualizationMatrix::Start(int iChannels,
-                                 int iSamplesPerSec,
-                                 int iBitsPerSample,
-                                 const std::string& szSongName)
+bool CVisualizationMatrix::Init()
 {
-  kodi::Log(ADDON_LOG_DEBUG, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample,
-            szSongName.c_str());
-
   //background vertex
   static const GLfloat vertex_data[] = {
       -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0,
@@ -211,22 +205,29 @@ bool CVisualizationMatrix::Start(int iChannels,
   glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
-  m_samplesPerSec = iSamplesPerSec;
-  Launch(m_currentPreset);
-  m_initialized = true;
-
   return true;
 }
 
-void CVisualizationMatrix::Stop()
+void CVisualizationMatrix::DeInit()
 {
   m_initialized = false;
-  kodi::Log(ADDON_LOG_DEBUG, "Stop");
+  kodi::Log(ADDON_LOG_DEBUG, "DeInit");
 
   UnloadPreset();
   UnloadTextures();
 
   glDeleteBuffers(1, &m_state.vertex_buffer);
+}
+
+bool CVisualizationMatrix::AudioStart(int iChannels, int iSamplesPerSec, int iBitsPerSample)
+{
+  kodi::Log(ADDON_LOG_DEBUG, "AudioStart %i %i %i", iChannels, iSamplesPerSec, iBitsPerSample);
+
+  m_samplesPerSec = iSamplesPerSec;
+  Launch(m_currentPreset);
+  m_initialized = true;
+
+  return true;
 }
 
 void CVisualizationMatrix::AudioData(const float* pAudioData, size_t iAudioDataLength)

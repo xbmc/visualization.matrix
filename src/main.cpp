@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2005-2021 Team Kodi <https://kodi.tv>
+ *  Copyright (C) 2005-2026 Team Kodi <https://kodi.tv>
  *
  *  SPDX-License-Identifier: GPL-2.0-or-later
  *  See LICENSE.md for more information.
@@ -13,11 +13,9 @@
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #define STBI_ONLY_BMP
-#include "stb_image.h"
 #include "kodi/Filesystem.h"
 #include "kodi/General.h"
-
-
+#include "stb_image.h"
 
 #define _USE_MATH_DEFINES
 #include <algorithm>
@@ -46,26 +44,24 @@ struct Preset
 
 // NOTE: With "#if defined(HAS_GL)" the use of some shaders is avoided
 //       as they can cause problems on weaker systems.
-const std::vector<Preset> g_presets =
-{
-   {"Kodi",                         30100, "logo.frag.glsl",        99,  0,  1, -1},
-   {"Album",                        30101, "album.frag.glsl",       99, -1,  1,  2},
-   {"Rain only",                    30102, "nologo.frag.glsl",      99, -1,  1, -1},
-   {"Rain with waveform",           30103, "nologowf.frag.glsl",    99, -1,  1, -1},
-   {"Rain with waveform envelope",  30104, "nologowfenv.frag.glsl", 99, -1,  1, -1},
-   {"Clean",                        30105, "clean.frag.glsl",       99, -1, -1, -1},
-   {"Clean with waveform",          30106, "cleanwf.frag.glsl",     99, -1, -1, -1},
-   {"Clean with waveform envelope", 30107, "cleanwfenv.frag.glsl",  99, -1, -1, -1},
+const std::vector<Preset> g_presets = {
+    {"Kodi", 30100, "logo.frag.glsl", 99, 0, 1, -1},
+    {"Album", 30101, "album.frag.glsl", 99, -1, 1, 2},
+    {"Rain only", 30102, "nologo.frag.glsl", 99, -1, 1, -1},
+    {"Rain with waveform", 30103, "nologowf.frag.glsl", 99, -1, 1, -1},
+    {"Rain with waveform envelope", 30104, "nologowfenv.frag.glsl", 99, -1, 1, -1},
+    {"Clean", 30105, "clean.frag.glsl", 99, -1, -1, -1},
+    {"Clean with waveform", 30106, "cleanwf.frag.glsl", 99, -1, -1, -1},
+    {"Clean with waveform envelope", 30107, "cleanwfenv.frag.glsl", 99, -1, -1, -1},
 };
 
-const std::vector<std::string> g_fileTextures =
-{
-  "logo.png",
-  "noise.png",
+const std::vector<std::string> g_fileTextures = {
+    "logo.png",
+    "noise.png",
 };
 
-std::string fsCommonFunctionsLowPower = 
-R"functions(float h11(float p)
+std::string fsCommonFunctionsLowPower =
+    R"functions(float h11(float p)
 {
   return fract(.13 * p + 217943.37373737 / (p + 0.31));
 }
@@ -99,8 +95,8 @@ vec2 getUV()
 
 )functions";
 
-std::string fsCommonFunctionsNormal = 
-R"functions(float h11(float p)
+std::string fsCommonFunctionsNormal =
+    R"functions(float h11(float p)
 {
   return fract(20.12345+sin(p*cRNDSEED1)*cRNDSEED2);
 }
@@ -157,9 +153,12 @@ CVisualizationMatrix::CVisualizationMatrix()
   }
   else
   {
-    if (Height() <= 900) m_dotSize = 3.;
-    else if (Height() <= 1500) m_dotSize = 4.;
-    else  m_dotSize = 5.;
+    if (Height() <= 900)
+      m_dotSize = 3.;
+    else if (Height() <= 1500)
+      m_dotSize = 4.;
+    else
+      m_dotSize = 5.;
   }
   m_fallSpeed = static_cast<float>(kodi::addon::GetSettingInt("fallspeed")) * .01;
   m_distortThreshold = static_cast<float>(kodi::addon::GetSettingInt("distortthreshold")) * .005;
@@ -168,14 +167,18 @@ CVisualizationMatrix::CVisualizationMatrix()
   m_dotColor.green = static_cast<float>(kodi::addon::GetSettingInt("green")) / 255.f;
   m_dotColor.blue = static_cast<float>(kodi::addon::GetSettingInt("blue")) / 255.f;
   m_lowpower = kodi::addon::GetSettingBoolean("lowpower");
-  m_noiseFluctuation = m_lowpower ? (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0002f)/m_fallSpeed * 0.25f : (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0004f)/m_fallSpeed * 0.25f;
+  m_noiseFluctuation =
+      m_lowpower ? (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0002f) /
+                       m_fallSpeed * 0.25f
+                 : (static_cast<float>(kodi::addon::GetSettingInt("noisefluctuation")) * 0.0004f) /
+                       m_fallSpeed * 0.25f;
   m_crtCurve = kodi::addon::GetSettingBoolean("crtcurve");
   m_lastAlbumChange = 0.0;
 }
 
 CVisualizationMatrix::~CVisualizationMatrix()
 {
-  delete [] m_pcm;
+  delete[] m_pcm;
   free(m_kissCfg);
 }
 
@@ -190,17 +193,11 @@ void CVisualizationMatrix::Render()
   }
 }
 
-bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPerSample, const std::string& szSongName)
+bool CVisualizationMatrix::Init()
 {
-  kodi::Log(ADDON_LOG_DEBUG, "Start %i %i %i %s\n", iChannels, iSamplesPerSec, iBitsPerSample, szSongName.c_str());
-
   //background vertex
-  static const GLfloat vertex_data[] =
-  {
-    -1.0, 1.0, 1.0, 1.0,
-     1.0, 1.0, 1.0, 1.0,
-     1.0,-1.0, 1.0, 1.0,
-    -1.0,-1.0, 1.0, 1.0,
+  static const GLfloat vertex_data[] = {
+      -1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, -1.0, -1.0, 1.0, 1.0,
   };
 
   // Upload vertex data to a buffer
@@ -208,17 +205,13 @@ bool CVisualizationMatrix::Start(int iChannels, int iSamplesPerSec, int iBitsPer
   glBindBuffer(GL_ARRAY_BUFFER, m_state.vertex_buffer);
   glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
 
-  m_samplesPerSec = iSamplesPerSec;
-  Launch(m_currentPreset);
-  m_initialized = true;
-
   return true;
 }
 
-void CVisualizationMatrix::Stop()
+void CVisualizationMatrix::DeInit()
 {
   m_initialized = false;
-  kodi::Log(ADDON_LOG_DEBUG, "Stop");
+  kodi::Log(ADDON_LOG_DEBUG, "DeInit");
 
   UnloadPreset();
   UnloadTextures();
@@ -226,6 +219,16 @@ void CVisualizationMatrix::Stop()
   glDeleteBuffers(1, &m_state.vertex_buffer);
 }
 
+bool CVisualizationMatrix::AudioStart(int iChannels, int iSamplesPerSec, int iBitsPerSample)
+{
+  kodi::Log(ADDON_LOG_DEBUG, "AudioStart %i %i %i", iChannels, iSamplesPerSec, iBitsPerSample);
+
+  m_samplesPerSec = iSamplesPerSec;
+  Launch(m_currentPreset);
+  m_initialized = true;
+
+  return true;
+}
 
 void CVisualizationMatrix::AudioData(const float* pAudioData, size_t iAudioDataLength)
 {
@@ -242,9 +245,11 @@ void CVisualizationMatrix::AudioData(const float* pAudioData, size_t iAudioDataL
 
   out[0].i = 0;
 
-  SmoothingOverTime(m_magnitudeBuffer.data(), m_magnitudeBuffer.data(), out, NUM_BANDS, SMOOTHING_TIME_CONSTANT, AUDIO_BUFFER);
+  SmoothingOverTime(m_magnitudeBuffer.data(), m_magnitudeBuffer.data(), out, NUM_BANDS,
+                    SMOOTHING_TIME_CONSTANT, AUDIO_BUFFER);
 
-  const double rangeScaleFactor = MAX_DECIBELS == MIN_DECIBELS ? 1 : (1.0 / (MAX_DECIBELS - MIN_DECIBELS));
+  const double rangeScaleFactor =
+      MAX_DECIBELS == MIN_DECIBELS ? 1 : (1.0 / (MAX_DECIBELS - MIN_DECIBELS));
   for (unsigned int i = 0; i < NUM_BANDS; i++)
   {
     float linearValue = m_magnitudeBuffer[i];
@@ -286,7 +291,7 @@ bool CVisualizationMatrix::PrevPreset()
 
 bool CVisualizationMatrix::LoadPreset(int select)
 {
-  kodi::Log(ADDON_LOG_DEBUG, "Loading preset %i\n",select);
+  kodi::Log(ADDON_LOG_DEBUG, "Loading preset %i\n", select);
   m_currentPreset = select % g_presets.size();
   Launch(m_currentPreset);
   UpdateAlbumart();
@@ -334,29 +339,35 @@ bool CVisualizationMatrix::UpdateAlbumart(const std::string& albumart)
 {
   m_albumArt = albumart;
 
-  kodi::Log(ADDON_LOG_DEBUG, "Updating album art %s\n",albumart.c_str());
+  kodi::Log(ADDON_LOG_DEBUG, "Updating album art %s\n", albumart.c_str());
   if (g_presets[m_currentPreset].channel[3] != 2)
   {
     return false;
   }
 
   std::string thumb = kodi::vfs::GetCacheThumbName(albumart.c_str());
-  thumb = thumb.substr(0,8);
-  std::string special = std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();
+  thumb = thumb.substr(0, 8);
+  std::string special =
+      std::string("special://thumbnails/") + thumb.c_str()[0] + std::string("/") + thumb.c_str();
 
   if (kodi::vfs::FileExists(special + std::string(".png")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[3] =
+        CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".png")), GL_RGBA,
+                      GL_LINEAR, GL_CLAMP_TO_EDGE);
     return true;
   }
   else if (kodi::vfs::FileExists(special + std::string(".jpg")))
   {
-    m_channelTextures[3] = CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[3] =
+        CreateTexture(kodi::vfs::TranslateSpecialProtocol(special + std::string(".jpg")), GL_RGBA,
+                      GL_LINEAR, GL_CLAMP_TO_EDGE);
     return true;
   }
 
-  m_channelTextures[3] = CreateTexture(kodi::addon::GetAddonPath("resources/textures/logo.png"), GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
-  
+  m_channelTextures[3] = CreateTexture(kodi::addon::GetAddonPath("resources/textures/logo.png"),
+                                       GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+
   return false;
 }
 
@@ -370,9 +381,14 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
     GLuint h = Height();
     if (m_state.fbwidth && m_state.fbheight)
       w = m_state.fbwidth, h = m_state.fbheight;
-    int64_t intt = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0 * m_fallSpeed) - m_initialTime;
+    int64_t intt =
+        static_cast<int64_t>(std::chrono::duration<double>(
+                                 std::chrono::high_resolution_clock::now().time_since_epoch())
+                                 .count() *
+                             1000.0 * m_fallSpeed) -
+        m_initialTime;
     if (m_bitsPrecision)
-      intt &= (1<<m_bitsPrecision)-1;
+      intt &= (1 << m_bitsPrecision) - 1;
 
     if (m_needsUpload)
     {
@@ -382,19 +398,21 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
         {
           glActiveTexture(GL_TEXTURE0 + i);
           glBindTexture(GL_TEXTURE_2D, m_channelTextures[i]);
-          glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, NUM_BANDS, 2, 0, GL_RED, GL_UNSIGNED_BYTE, m_audioData.data());
+          glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, NUM_BANDS, 2, 0, GL_RED, GL_UNSIGNED_BYTE,
+                       m_audioData.data());
         }
       }
       m_needsUpload = false;
 
-
       if (g_presets[m_currentPreset].channel[3] == 2)
       {
-        double logotimer = std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-        float delta = static_cast<float>(logotimer - m_lastAlbumChange)*0.6f;
-        GLfloat r = std::max(static_cast<float>(sin(delta)),0.0f)*0.7f;
-        GLfloat g = std::max(static_cast<float>(sin(delta - 1.0f)),0.0f)*0.7f;
-        GLfloat b = std::max(static_cast<float>(sin(delta - 2.0f)),0.0f)*0.7f;
+        double logotimer = std::chrono::duration<double>(
+                               std::chrono::high_resolution_clock::now().time_since_epoch())
+                               .count();
+        float delta = static_cast<float>(logotimer - m_lastAlbumChange) * 0.6f;
+        GLfloat r = std::max(static_cast<float>(sin(delta)), 0.0f) * 0.7f;
+        GLfloat g = std::max(static_cast<float>(sin(delta - 1.0f)), 0.0f) * 0.7f;
+        GLfloat b = std::max(static_cast<float>(sin(delta - 2.0f)), 0.0f) * 0.7f;
         glUniform3f(m_attrAlbumRGBLoc, r, g, b);
         if (m_lastAlbumChange == 0.0)
         {
@@ -402,15 +420,20 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
         }
         if (logotimer - m_lastAlbumChange >= 10.)
         {
-          m_albumX = static_cast<GLfloat>(std::fmod(logotimer * 1234., 1.) * (static_cast<double>(Width())/static_cast<double>(Height()) + 1.) - 1.);
+          m_albumX = static_cast<GLfloat>(
+              std::fmod(logotimer * 1234., 1.) *
+                  (static_cast<double>(Width()) / static_cast<double>(Height()) + 1.) -
+              1.);
           m_albumY = static_cast<GLfloat>(std::fmod(logotimer * 7654., 1.));
           m_lastAlbumChange = logotimer;
           m_AlbumNeedsUpload = true;
         }
         if (m_AlbumNeedsUpload)
         {
-          glUniform3f(m_attrAlbumPositionLoc, m_albumX, m_albumY, 2.0f);//FIXME: proper framing, the album can reach over the edge of the screen
-          m_AlbumNeedsUpload = true;//FIXME: limit upload to the actual album shader
+          glUniform3f(
+              m_attrAlbumPositionLoc, m_albumX, m_albumY,
+              2.0f); //FIXME: proper framing, the album can reach over the edge of the screen
+          m_AlbumNeedsUpload = true; //FIXME: limit upload to the actual album shader
         }
       }
     }
@@ -452,7 +475,10 @@ void CVisualizationMatrix::RenderTo(GLuint shader, GLuint effect_fb)
   glUseProgram(0);
 }
 
-void CVisualizationMatrix::Mix(float* destination, const float* source, size_t frames, size_t channels)
+void CVisualizationMatrix::Mix(float* destination,
+                               const float* source,
+                               size_t frames,
+                               size_t channels)
 {
   size_t length = frames * channels;
   for (unsigned int i = 0; i < length; i += channels)
@@ -499,9 +525,11 @@ void CVisualizationMatrix::Launch(int preset)
   m_usedShaderFile = kodi::addon::GetAddonPath("resources/shaders/" + g_presets[preset].file);
   for (int i = 0; i < 4; i++)
   {
-    if (g_presets[preset].channel[i] >= 0 && g_presets[preset].channel[i] < static_cast< int > (g_fileTextures.size()))
+    if (g_presets[preset].channel[i] >= 0 &&
+        g_presets[preset].channel[i] < static_cast<int>(g_fileTextures.size()))
     {
-      m_shaderTextures[i].texture = kodi::addon::GetAddonPath("resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
+      m_shaderTextures[i].texture = kodi::addon::GetAddonPath(
+          "resources/textures/" + g_fileTextures[g_presets[preset].channel[i]]);
     }
     else if (g_presets[preset].channel[i] == 99) // framebuffer
     {
@@ -518,17 +546,20 @@ void CVisualizationMatrix::Launch(int preset)
   // Logo
   if (!m_shaderTextures[1].texture.empty())
   {
-    m_channelTextures[1] = CreateTexture(m_shaderTextures[1].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[1] =
+        CreateTexture(m_shaderTextures[1].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   }
   // Noise
   if (!m_shaderTextures[2].texture.empty())
   {
-    m_channelTextures[2] = CreateTexture(m_shaderTextures[2].texture, GL_RGBA, GL_LINEAR, GL_REPEAT);
+    m_channelTextures[2] =
+        CreateTexture(m_shaderTextures[2].texture, GL_RGBA, GL_LINEAR, GL_REPEAT);
   }
   // Album
   if (!m_shaderTextures[3].texture.empty())
   {
-    m_channelTextures[3] = CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    m_channelTextures[3] =
+        CreateTexture(m_shaderTextures[3].texture, GL_RGBA, GL_LINEAR, GL_CLAMP_TO_EDGE);
   }
 
   m_state.fbwidth = Width();
@@ -552,11 +583,13 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
 {
   UnloadPreset();
   GatherDefines();
-  std::string vertMatrixShader = kodi::addon::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
+  std::string vertMatrixShader =
+      kodi::addon::GetAddonPath("resources/shaders/main_matrix_" GL_TYPE_STRING ".vert.glsl");
   if (!m_matrixShader.LoadShaderFiles(vertMatrixShader, shaderPath) ||
       !m_matrixShader.CompileAndLink("", "", m_defines, ""))
   {
-    kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current file '%s')", shaderPath.c_str());
+    kodi::Log(ADDON_LOG_ERROR, "Failed to compile matrix shaders (current file '%s')",
+              shaderPath.c_str());
     return;
   }
 
@@ -570,23 +603,28 @@ void CVisualizationMatrix::LoadPreset(const std::string& shaderPath)
   m_attrChannelLoc[2] = glGetUniformLocation(matrixShader, "iChannel2");
   m_attrChannelLoc[3] = glGetUniformLocation(matrixShader, "iChannel3");
 
-  m_state.attr_vertex_e = glGetAttribLocation(matrixShader,  "vertex");
+  m_state.attr_vertex_e = glGetAttribLocation(matrixShader, "vertex");
 
   // Prepare a texture to render to
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &m_state.framebuffer_texture);
   glBindTexture(GL_TEXTURE_2D, m_state.framebuffer_texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_state.fbwidth, m_state.fbheight, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_state.fbwidth, m_state.fbheight, 0, GL_RGB,
+               GL_UNSIGNED_BYTE, 0);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
   // Prepare a framebuffer for rendering
   glGenFramebuffers(1, &m_state.effect_fb);
   glBindFramebuffer(GL_FRAMEBUFFER, m_state.effect_fb);
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_state.framebuffer_texture, 0);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                         m_state.framebuffer_texture, 0);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-  m_initialTime = static_cast<int64_t>(std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() * 1000.0);
+  m_initialTime = static_cast<int64_t>(
+      std::chrono::duration<double>(std::chrono::high_resolution_clock::now().time_since_epoch())
+          .count() *
+      1000.0);
   m_initialTime += (m_initialTime % 100000);
 }
 
@@ -604,15 +642,18 @@ void CVisualizationMatrix::UnloadPreset()
   }
 }
 
-GLuint CVisualizationMatrix::CreateTexture(GLint format, unsigned int w, unsigned int h, const GLvoid* data)
+GLuint CVisualizationMatrix::CreateTexture(GLint format,
+                                           unsigned int w,
+                                           unsigned int h,
+                                           const GLvoid* data)
 {
   GLuint texture = 0;
   glActiveTexture(GL_TEXTURE0);
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
 
-  glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -621,7 +662,13 @@ GLuint CVisualizationMatrix::CreateTexture(GLint format, unsigned int w, unsigne
   return texture;
 }
 
-GLuint CVisualizationMatrix::CreateTexture(const GLvoid* data, GLint format, unsigned int w, unsigned int h, GLint internalFormat, GLint scaling, GLint repeat)
+GLuint CVisualizationMatrix::CreateTexture(const GLvoid* data,
+                                           GLint format,
+                                           unsigned int w,
+                                           unsigned int h,
+                                           GLint internalFormat,
+                                           GLint scaling,
+                                           GLint repeat)
 {
   GLuint texture = 0;
   glGenTextures(1, &texture);
@@ -639,20 +686,23 @@ GLuint CVisualizationMatrix::CreateTexture(const GLvoid* data, GLint format, uns
   return texture;
 }
 
-GLuint CVisualizationMatrix::CreateTexture(const std::string& file, GLint internalFormat, GLint scaling, GLint repeat)
+GLuint CVisualizationMatrix::CreateTexture(const std::string& file,
+                                           GLint internalFormat,
+                                           GLint scaling,
+                                           GLint repeat)
 {
   kodi::Log(ADDON_LOG_DEBUG, "creating texture %s\n", file.c_str());
 
-  int width,height,n;
+  int width, height, n;
   unsigned char* image;
   stbi_set_flip_vertically_on_load(true);
-  
+
   image = stbi_load(file.c_str(), &height, &width, &n, STBI_rgb_alpha);
   if (image == nullptr)
   {
     kodi::Log(ADDON_LOG_ERROR, "couldn't load image");
     return 0;
-  }  
+  }
 
   GLuint texture = CreateTexture(image, GL_RGBA, width, height, internalFormat, scaling, repeat);
   stbi_image_free(image);
@@ -672,13 +722,19 @@ float CVisualizationMatrix::BlackmanWindow(float in, size_t i, size_t length)
   return in * (a0 - a1 * cos(2.0 * M_PI * x) + a2 * cos(4.0 * M_PI * x));
 }
 
-void CVisualizationMatrix::SmoothingOverTime(float* outputBuffer, float* lastOutputBuffer, kiss_fft_cpx* inputBuffer, size_t length, float smoothingTimeConstant, unsigned int fftSize)
+void CVisualizationMatrix::SmoothingOverTime(float* outputBuffer,
+                                             float* lastOutputBuffer,
+                                             kiss_fft_cpx* inputBuffer,
+                                             size_t length,
+                                             float smoothingTimeConstant,
+                                             unsigned int fftSize)
 {
   for (size_t i = 0; i < length; i++)
   {
     kiss_fft_cpx c = inputBuffer[i];
     float magnitude = sqrt(c.r * c.r + c.i * c.i) / (float)fftSize;
-    outputBuffer[i] = smoothingTimeConstant * lastOutputBuffer[i] + (1.0 - smoothingTimeConstant) * magnitude;
+    outputBuffer[i] =
+        smoothingTimeConstant * lastOutputBuffer[i] + (1.0 - smoothingTimeConstant) * magnitude;
   }
 }
 
@@ -691,7 +747,7 @@ float CVisualizationMatrix::LinearToDecibels(float linear)
 
 int CVisualizationMatrix::DetermineBitsPrecision()
 {
-  m_state.fbwidth = 32, m_state.fbheight = 26*10;
+  m_state.fbwidth = 32, m_state.fbheight = 26 * 10;
   LoadPreset(kodi::addon::GetAddonPath("resources/shaders/main_test.frag.glsl"));
   RenderTo(m_matrixShader.ProgramHandle(), m_state.effect_fb);
   glFinish();
@@ -702,9 +758,9 @@ int CVisualizationMatrix::DetermineBitsPrecision()
 
   int bits = 0;
   unsigned char b = 0;
-  for (int j=0; j<m_state.fbheight; j++)
+  for (int j = 0; j < m_state.fbheight; j++)
   {
-    unsigned char c = buffer[4*(j*m_state.fbwidth+(m_state.fbwidth>>1))];
+    unsigned char c = buffer[4 * (j * m_state.fbwidth + (m_state.fbwidth >> 1))];
     if (c && !b)
       bits++;
     b = c;
@@ -740,19 +796,24 @@ void CVisualizationMatrix::GatherDefines()
   m_defines += "const float cVIGNETTEINTENSITY = 0.05;\n";
 
   m_defines += "const float cDotSize = " + std::to_string(m_dotSize) + ";\n";
-  m_defines += "const float cColumns = " + std::to_string(static_cast<float>(Width())/(m_dotSize*2.0)) + ";\n";
+  m_defines +=
+      "const float cColumns = " + std::to_string(static_cast<float>(Width()) / (m_dotSize * 2.0)) +
+      ";\n";
   m_defines += "const float cNoiseFluctuation = " + std::to_string(m_noiseFluctuation) + ";\n";
   m_defines += "const float cDistortThreshold = " + std::to_string(m_distortThreshold) + ";\n";
   m_defines += "const float cRainHighlights = " + std::to_string(m_rainHighlights) + ";\n";
-  m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," + std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
+  m_defines += "const vec3 cColor = vec3(" + std::to_string(m_dotColor.red) + "," +
+               std::to_string(m_dotColor.green) + "," + std::to_string(m_dotColor.blue) + ");\n";
 
   if (m_state.fbwidth && m_state.fbheight)
   {
-    m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," + std::to_string(m_state.fbheight) + ");\n";
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(m_state.fbwidth) + "," +
+                 std::to_string(m_state.fbheight) + ");\n";
   }
   else
   {
-    m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," + std::to_string(Height()) + ".);\n";
+    m_defines += "const vec2 cResolution = vec2(" + std::to_string(Width()) + ".," +
+                 std::to_string(Height()) + ".);\n";
   }
 
   m_defines += "uniform sampler2D iChannel0;\n";
@@ -767,7 +828,7 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += "uniform sampler2D iChannel2;\n";
     m_defines += "#define dNoise\n";
   }
-  
+
   if (g_presets[m_currentPreset].channel[3] != -1)
   {
     m_defines += "uniform sampler2D iChannel3;\n";
@@ -795,7 +856,7 @@ void CVisualizationMatrix::GatherDefines()
     m_defines += fsCommonFunctionsNormal;
   }
 
-  kodi::Log(ADDON_LOG_DEBUG, "Fragment shader header\n%s",m_defines.c_str());
+  kodi::Log(ADDON_LOG_DEBUG, "Fragment shader header\n%s", m_defines.c_str());
 }
 
 ADDONCREATOR(CVisualizationMatrix) // Don't touch this!

@@ -1,0 +1,30 @@
+name: cppcheck
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+
+jobs:
+  cppcheck:
+    name: cppcheck
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install cppcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cppcheck
+
+    - name: Run cppcheck
+      run: |
+        cppcheck --enable=all --inconclusive --std=c++17 --verbose \
+          --suppress=missingIncludeSystem \
+          --suppress=unmatchedSuppression \
+          --suppress=preprocessorErrorDirective \
+          src/ lib/ \
+          --error-exitcode=1

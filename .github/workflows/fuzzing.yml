@@ -1,0 +1,93 @@
+name: Fuzzing with AFL++
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+  workflow_dispatch:
+
+jobs:
+  fuzz-kissfft:
+    name: Fuzz kissfft library
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/google/oss-fuzz-base:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        apt-get update && apt-get install -y cmake clang libgl1-mesa-dev
+
+    - name: Build kissfft with fuzzing instrumentation
+      run: |
+        mkdir -p build-fuzz
+        cd build-fuzz
+        
+        # Build kissfft with AFL++ instrumentation
+        CC=afl-cc CXX=afl-c++ cmake .. -DCMAKE_BUILD_TYPE=Debug
+        make -j$(nproc)
+
+    - name: Prepare fuzzing targets
+      run: |
+        # Create a simple fuzzing target for kissfft
+        cat > fuzz_target.cpp << 'EOF'
+        #include "../lib/kissfft/kiss_fft.h"
+        #include <stdint.h>
+        #include <stdlib.h>
+        
+        extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+            if (size < 2 * sizeof(float)) return 0;
+            
+            // Convert input to float samples
+            const float *samples = reinterpret_cast<const float*>(data);
+            int nfft = size / sizeof(float);
+            
+            // Allocate buffers
+            kiss_fft_cpx *in = new kiss_fft_cpx[nfft/2 + 1];
+            kiss_fft_cpx *out = new kiss_fft_cpx[nfft/2 + 1];
+            kiss_fftr_cfg cfg = kiss_fftr_alloc(nfft, 0, 0, 0);
+            
+            if (!in || !out || !cfg) {
+                delete[] in;
+                delete[] out;
+                if (cfg) kiss_fftr_free(cfg);
+                return 0;
+            }
+            
+            // Fill input with fuzzed data
+            for (int i = 0; i < nfft/2 + 1; i++) {
+                in[i].r = samples[i*2];
+                in[i].i = samples[i*2 + 1];
+            }
+            
+            // Perform FFT
+            kiss_fftr(cfg, in, out);
+            
+            // Cleanup
+            delete[] in;
+            delete[] out;
+            kiss_fftr_free(cfg);
+            
+            return 0;
+        }
+        EOF
+        
+        # Compile fuzzing target
+        afl-c++ -o fuzz_target fuzz_target.cpp -I../lib/kissfft build-fuzz/libkissfft.a -lm
+
+    - name: Run AFL++ fuzzer
+      run: |
+        mkdir -p findings
+        timeout 300 afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
+
+    - name: Upload fuzzing findings
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: fuzzing-findings
+        path: findings/
+        retention-days: 30

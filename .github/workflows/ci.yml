@@ -1,0 +1,109 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+
+jobs:
+  static-analysis:
+    name: Static Analysis
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [codeql, clang-tidy, cppcheck]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run CodeQL
+      if: matrix.tool == 'codeql'
+      uses: github/codeql-action/analyze@v3
+      with:
+        languages: cpp
+
+    - name: Run clang-tidy
+      if: matrix.tool == 'clang-tidy'
+      run: |
+        sudo apt-get update && sudo apt-get install -y clang-tidy-14 cmake ninja-build
+        mkdir -p build && cd build
+        cmake -G Ninja -DCMAKE_CXX_CLANG_TIDY="clang-tidy-14;-checks=*;-warnings-as-errors=*" ..
+        ninja -j$(nproc)
+
+    - name: Run cppcheck
+      if: matrix.tool == 'cppcheck'
+      run: |
+        sudo apt-get update && sudo apt-get install -y cppcheck
+        cppcheck --enable=all --inconclusive --std=c++17 src/ lib/ --error-exitcode=1
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        tool: [trivy]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Run Trivy
+      if: matrix.tool == 'trivy'
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        severity: 'CRITICAL,HIGH'
+
+  sbom:
+    name: SBOM Generation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Syft
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Generate SBOM
+      run: |
+        syft dir:. -o spdx-json --file sbom.spdx.json
+        syft dir:. -o cyclonedx-json --file sbom.cyclonedx.json
+
+    - name: Upload SBOM
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom
+        path: |
+          sbom.spdx.json
+          sbom.cyclonedx.json
+
+  build:
+    name: Build
+    needs: [static-analysis, security-scan]
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ make libgl1-mesa-dev
+
+    - name: Build project
+      run: |
+        mkdir -p build && cd build
+        cmake -DCMAKE_BUILD_TYPE=Debug ..
+        make -j$(nproc)
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: build/

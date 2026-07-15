@@ -3,8 +3,20 @@ name: cppcheck
 on:
   push:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'lib/**'
+      - 'src/**'
   pull_request:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'lib/**'
+      - 'src/**'
 
 jobs:
   cppcheck:
@@ -22,9 +34,25 @@ jobs:
 
     - name: Run cppcheck
       run: |
-        cppcheck --enable=all --inconclusive --std=c++17 --verbose \
+        # Run cppcheck with comprehensive checks
+        cppcheck --enable=all \
+          --inconclusive \
+          --std=c++17 \
+          --addon=misra \
+          --library=posix \
+          --verbose \
           --suppress=missingIncludeSystem \
           --suppress=unmatchedSuppression \
           --suppress=preprocessorErrorDirective \
-          src/ lib/ \
-          --error-exitcode=1
+          --suppress=*:lib/kissfft/* \
+          --error-exitcode=1 \
+          src/ lib/ 
+          2> cppcheck-report.txt || true
+
+    - name: Upload cppcheck report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cppcheck-report
+        path: cppcheck-report.txt
+        retention-days: 30

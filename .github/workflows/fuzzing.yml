@@ -3,9 +3,24 @@ name: Fuzzing with AFL++
 on:
   push:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'lib/kissfft/**'
+      - 'src/**'
   pull_request:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'lib/kissfft/**'
+      - 'src/**'
   workflow_dispatch:
+    inputs:
+      fuzz-time:
+        description: 'Fuzzing duration in seconds (default: 300)'
+        required: false
+        default: '300'
+      target:
+        description: 'Fuzzing target (kissfft or all)'
+        required: false
+        default: 'kissfft'
 
 jobs:
   fuzz-kissfft:
@@ -38,6 +53,7 @@ jobs:
         #include "../lib/kissfft/kiss_fft.h"
         #include <stdint.h>
         #include <stdlib.h>
+        #include <cmath>
         
         extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
             if (size < 2 * sizeof(float)) return 0;
@@ -45,6 +61,11 @@ jobs:
             // Convert input to float samples
             const float *samples = reinterpret_cast<const float*>(data);
             int nfft = size / sizeof(float);
+            
+            // Ensure nfft is a power of 2 for FFT
+            int power_of_2 = 1;
+            while (power_of_2 * 2 <= nfft) power_of_2 *= 2;
+            nfft = power_of_2;
             
             // Allocate buffers
             kiss_fft_cpx *in = new kiss_fft_cpx[nfft/2 + 1];
@@ -58,10 +79,12 @@ jobs:
                 return 0;
             }
             
-            // Fill input with fuzzed data
+            // Fill input with fuzzed data (ensure finite values)
             for (int i = 0; i < nfft/2 + 1; i++) {
-                in[i].r = samples[i*2];
-                in[i].i = samples[i*2 + 1];
+                float r = samples[i*2];
+                float im = samples[i*2 + 1];
+                in[i].r = std::isfinite(r) ? r : 0.0f;
+                in[i].i = std::isfinite(im) ? im : 0.0f;
             }
             
             // Perform FFT
@@ -82,7 +105,8 @@ jobs:
     - name: Run AFL++ fuzzer
       run: |
         mkdir -p findings
-        timeout 300 afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
+        FUZZ_TIME=${{ github.event.inputs.fuzz-time || '300' }}
+        timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
 
     - name: Upload fuzzing findings
       uses: actions/upload-artifact@v4
@@ -91,3 +115,11 @@ jobs:
         name: fuzzing-findings
         path: findings/
         retention-days: 30
+
+    - name: Upload fuzzing corpus
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: fuzzing-corpus
+        path: findings/queue/
+        retention-days: 7

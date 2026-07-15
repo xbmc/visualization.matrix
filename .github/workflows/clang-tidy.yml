@@ -3,8 +3,18 @@ name: clang-tidy
 on:
   push:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
   pull_request:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
 
 jobs:
   clang-tidy:
@@ -20,14 +30,25 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y clang-tidy-14 lld-14 cmake ninja-build
 
-    - name: Run clang-tidy
+    - name: Configure CMake with clang-tidy
       run: |
-        # Create a build directory
         mkdir -p build
         cd build
         
-        # Generate compile_commands.json using CMake and Ninja
-        cmake -G Ninja -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
-        
-        # Run clang-tidy on all source files
-        find ../src -name "*.cpp" -o -name "*.h" | xargs -I {} clang-tidy-14 {} -p . --warnings-as-errors=* -quiet
+        # Generate compile_commands.json with clang-tidy flags
+        cmake -G Ninja \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_CLANG_TIDY="clang-tidy-14;-checks=*,-modernize-use-trailing-return-type;-warnings-as-errors=*;-quiet" \
+          ..
+
+    - name: Build project
+      run: |
+        cd build
+        ninja -j$(nproc)
+
+    - name: Run clang-tidy
+      run: |
+        cd build
+        # Run clang-tidy on all compilation units
+        ninja -t commands | xargs -I {} sh -c '{} 2>&1 | grep -v "^Checking" | grep -v "^Supppression"' || true

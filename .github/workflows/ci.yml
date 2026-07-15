@@ -3,8 +3,22 @@ name: CI Pipeline
 on:
   push:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
   pull_request:
     branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
 
 jobs:
   static-analysis:
@@ -13,10 +27,22 @@ jobs:
     strategy:
       matrix:
         tool: [codeql, clang-tidy, cppcheck]
+      fail-fast: false
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/clang-tidy
+          ~/.cache/cppcheck
+          ~/.cache/CMake
+        key: ${{ runner.os }}-${{ matrix.tool }}-${{ hashFiles('CMakeLists.txt', 'src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-${{ matrix.tool }}-
 
     - name: Run CodeQL
       if: matrix.tool == 'codeql'
@@ -44,10 +70,19 @@ jobs:
     strategy:
       matrix:
         tool: [trivy]
+      fail-fast: false
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache Trivy
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/trivy
+        key: ${{ runner.os }}-trivy-${{ hashFiles('.') }}
+        restore-keys: |
+          ${{ runner.os }}-trivy-
 
     - name: Run Trivy
       if: matrix.tool == 'trivy'
@@ -64,6 +99,14 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache Syft
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/syft
+        key: ${{ runner.os }}-syft-${{ hashFiles('.') }}
+        restore-keys: |
+          ${{ runner.os }}-syft-
 
     - name: Install Syft
       run: |
@@ -90,6 +133,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache CMake
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/CMake
+          build/
+        key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
 
     - name: Install dependencies
       run: |

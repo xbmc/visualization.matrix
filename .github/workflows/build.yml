@@ -29,10 +29,20 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Cache CMake dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/CMake
+          build/
+        key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
+
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y cmake g++ make libgl1-mesa-dev
+        sudo apt-get install -y cmake g++ make libgl1-mesa-dev libglu1-mesa-dev
 
     - name: Configure CMake
       run: |
@@ -60,6 +70,16 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: Cache CMake dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~\.cache\CMake
+          build\*
+        key: ${{ runner.os }}-cmake-${{ hashFiles('CMakeLists.txt', 'src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-cmake-
+
     - name: Install dependencies
       uses: ilammy/msvc-dev-cmd@v1
 
@@ -72,7 +92,7 @@ jobs:
     - name: Build project
       run: |
         cd build
-        cmake --build . --config Debug
+        cmake --build . --config Debug --parallel %NUMBER_OF_PROCESSORS%
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

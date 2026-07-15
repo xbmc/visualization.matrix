@@ -1,0 +1,103 @@
+name: OWASP ZAP Dynamic Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      target-url:
+        description: 'URL to scan (default: localhost:8080)'
+        required: false
+        default: 'http://localhost:8080'
+      scan-type:
+        description: 'Scan type (baseline, full, or api)'
+        required: false
+        default: 'baseline'
+      auto-approve:
+        description: 'Auto-approve alerts (for testing only)'
+        required: false
+        default: 'false'
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+
+jobs:
+  zap-scan:
+    name: OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    container:
+      image: owasp/zap2docker-weekly:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Start ZAP in daemon mode
+      run: |
+        zap-baseline.py -t ${{ github.event.inputs.target-url }} -r zap-report.html || true
+
+    - name: Upload ZAP report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: zap-report
+        path: zap-report.html
+        retention-days: 30
+
+    - name: Convert report to SARIF
+      if: always()
+      run: |
+        # Install jq for JSON processing
+        apt-get update && apt-get install -y jq
+        
+        # Convert HTML report to SARIF (simplified)
+        cat > zap-to-sarif.py << 'EOF'
+        import json
+        import re
+        
+        # Read ZAP HTML report and extract alerts
+        with open('zap-report.html', 'r') as f:
+            content = f.read()
+        
+        # Simple SARIF structure
+        sarif = {
+            "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+            "version": "2.1.0",
+            "runs": [{
+                "tool": {
+                    "driver": {
+                        "name": "OWASP ZAP",
+                        "informationUri": "https://www.zaproxy.org/",
+                        "version": "2.10.0"
+                    }
+                },
+                "results": []
+            }]
+        }
+        
+        # Extract alerts from HTML (simplified regex)
+        alert_pattern = r'<tr class=".*?">.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>.*?<td>(.*?)</td>'
+        alerts = re.findall(alert_pattern, content, re.DOTALL)
+        
+        for alert in alerts:
+            if len(alert) >= 4:
+                risk, name, url, _ = alert
+                sarif["runs"][0]["results"].append({
+                    "ruleId": name.strip(),
+                    "level": risk.strip().lower(),
+                    "message": {"text": f"{name.strip()} found at {url.strip()}"},
+                    "locations": [{
+                        "physicalLocation": {
+                            "artifactLocation": {"uri": url.strip()}
+                        }
+                    }]
+                })
+        
+        with open('zap-report.sarif', 'w') as f:
+            json.dump(sarif, f, indent=2)
+        EOF
+        
+        python3 zap-to-sarif.py || true
+
+    - name: Upload SARIF report
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'zap-report.sarif'

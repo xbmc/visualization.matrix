@@ -14,13 +14,17 @@ on:
   workflow_dispatch:
     inputs:
       fuzz-time:
-        description: 'Fuzzing duration in seconds (default: 300)'
+        description: 'Fuzzing duration in seconds (default: 600 = 10 minutes)'
         required: false
-        default: '300'
+        default: '600'
       target:
         description: 'Fuzzing target (kissfft or all)'
         required: false
         default: 'kissfft'
+      cores:
+        description: 'Number of CPU cores to use (default: 2)'
+        required: false
+        default: '2'
 
 jobs:
   fuzz-kissfft:
@@ -32,6 +36,16 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Cache AFL++ corpus
+      uses: actions/cache@v3
+      with:
+        path: |
+          .afl-cov/
+          findings/
+        key: ${{ runner.os }}-afl-corpus-${{ hashFiles('lib/kissfft/**', 'src/**') }}
+        restore-keys: |
+          ${{ runner.os }}-afl-corpus-
 
     - name: Install dependencies
       run: |
@@ -54,6 +68,7 @@ jobs:
         #include <stdint.h>
         #include <stdlib.h>
         #include <cmath>
+        #include <algorithm>
         
         extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
             if (size < 2 * sizeof(float)) return 0;
@@ -62,10 +77,10 @@ jobs:
             const float *samples = reinterpret_cast<const float*>(data);
             int nfft = size / sizeof(float);
             
-            // Ensure nfft is a power of 2 for FFT
+            // Ensure nfft is a power of 2 for FFT (max 2^16 for performance)
             int power_of_2 = 1;
-            while (power_of_2 * 2 <= nfft) power_of_2 *= 2;
-            nfft = power_of_2;
+            while (power_of_2 * 2 <= nfft && power_of_2 <= 65536) power_of_2 *= 2;
+            nfft = std::min(power_of_2, 65536);
             
             // Allocate buffers
             kiss_fft_cpx *in = new kiss_fft_cpx[nfft/2 + 1];
@@ -105,8 +120,26 @@ jobs:
     - name: Run AFL++ fuzzer
       run: |
         mkdir -p findings
-        FUZZ_TIME=${{ github.event.inputs.fuzz-time || '300' }}
-        timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
+        FUZZ_TIME=${{ github.event.inputs.fuzz-time || '600' }}
+        CORES=${{ github.event.inputs.cores || '2' }}
+        
+        # Run AFL++ with parallel fuzzing if multiple cores
+        if [ "$CORES" -gt 1 ]; then
+          # Split into multiple instances
+          for i in $(seq 1 $CORES); do
+            mkdir -p findings_$i
+            timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings_$i -t 5000 -- ./fuzz_target -M main_$i &
+          done
+          wait
+          # Merge findings
+          mkdir -p findings
+          for i in $(seq 1 $CORES); do
+            cp findings_$i/queue/* findings/ 2>/dev/null || true
+            cp findings_$i/crashes/* findings/ 2>/dev/null || true
+          done
+        else
+          timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
+        fi
 
     - name: Upload fuzzing findings
       uses: actions/upload-artifact@v4

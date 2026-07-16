@@ -1,0 +1,116 @@
+name: Auto-generate CHANGELOG
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+      dry-run:
+        description: 'Dry run (do not create commit)'
+        required: false
+        default: 'false'
+
+jobs:
+  generate-changelog:
+    name: Generate CHANGELOG
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required to get full git history
+
+    - name: Install standard-version
+      run: |
+        npm install -g standard-version
+
+    - name: Generate CHANGELOG
+      id: changelog
+      run: |
+        # Configure git
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        
+        # Generate changelog using standard-version
+        VERSION=${{ github.event.inputs.version || 'patch' }}
+        DRY_RUN=${{ github.event.inputs.dry-run || 'false' }}
+        
+        if [ "$DRY_RUN" = "true" ]; then
+          npx standard-version --dry-run --no-verify --skip.changelog
+        else
+          # Generate changelog without committing
+          npx standard-version --no-verify --skip.commit --skip.tag --skip.changelog
+          
+          # Manually update CHANGELOG.md
+          if [ -f "CHANGELOG.md" ]; then
+            # Extract version and date from git log
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+            CURRENT_DATE=$(date +"%Y-%m-%d")
+            
+            # Generate changelog entries from commits since last tag
+            echo "## [$VERSION] - $CURRENT_DATE" >> CHANGELOG_NEW.md
+            echo "" >> CHANGELOG_NEW.md
+            
+            # Get commits since last tag
+            git log $LATEST_TAG..HEAD --pretty=format:"- %s (%h)" --reverse >> CHANGELOG_NEW.md
+            echo "" >> CHANGELOG_NEW.md
+            
+            # Prepend to existing CHANGELOG.md
+            cat CHANGELOG_NEW.md CHANGELOG.md > CHANGELOG_TEMP.md
+            mv CHANGELOG_TEMP.md CHANGELOG.md
+            rm CHANGELOG_NEW.md
+          fi
+        fi
+
+    - name: Create Pull Request with CHANGELOG updates
+      if: github.event.inputs.dry-run != 'true' && github.event_name != 'push'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "docs: update CHANGELOG for v${{ github.event.inputs.version }}"
+        title: "docs: update CHANGELOG for v${{ github.event.inputs.version }}"
+        body: "Automatically generated CHANGELOG updates for version ${{ github.event.inputs.version }}"
+        branch: "changelog/update-v${{ github.event.inputs.version }}"
+        delete-branch: true
+        path: .
+        reviewers: MarcelRaschke
+
+    - name: Upload CHANGELOG artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: changelog
+        path: CHANGELOG.md
+        retention-days: 30
+
+  release:
+    name: Create Release
+    needs: generate-changelog
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download CHANGELOG artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: changelog
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          CHANGELOG.md
+        body_file: CHANGELOG.md
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

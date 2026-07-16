@@ -1,0 +1,88 @@
+name: SonarQube Analysis
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
+
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Required for SonarQube to detect PR base branch
+
+    - name: Cache SonarQube
+      uses: actions/cache@v3
+      with:
+        path: ~/.sonar
+        key: ${{ runner.os }}-sonar-${{ hashFiles('sonar-project.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-sonar-
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ make libgl1-mesa-dev
+
+    - name: Configure CMake with coverage
+      run: |
+        mkdir -p build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="--coverage" ..
+
+    - name: Build project
+      run: |
+        cd build
+        make -j$(nproc)
+
+    - name: Run tests with coverage
+      run: |
+        cd build
+        # Run tests if available, otherwise skip
+        ctest --output-on-failure || echo "No tests found"
+        # Generate coverage report
+        gcov -r . 2>/dev/null || true
+        lcov --capture --directory . --output-file coverage.info 2>/dev/null || true
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@master
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      with:
+        projectBaseDir: .
+        args: |
+          -Dsonar.projectKey=visualization.matrix
+          -Dsonar.projectName=visualization.matrix
+          -Dsonar.sources=src,lib
+          -Dsonar.cxx.coverage.reportPaths=build/coverage.info
+          -Dsonar.cxx.clang-tidy.report-path=build/clang-tidy-report.txt
+          -Dsonar.cxx.cppcheck.report-path=build/cppcheck-report.txt
+
+    - name: Upload SonarQube report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: sonarqube-report
+        path: .scannerwork/
+        retention-days: 30

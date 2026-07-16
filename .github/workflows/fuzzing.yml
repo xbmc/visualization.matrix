@@ -1,0 +1,158 @@
+name: Fuzzing with AFL++
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'lib/kissfft/**'
+      - 'src/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'lib/kissfft/**'
+      - 'src/**'
+  workflow_dispatch:
+    inputs:
+      fuzz-time:
+        description: 'Fuzzing duration in seconds (default: 600 = 10 minutes)'
+        required: false
+        default: '600'
+      target:
+        description: 'Fuzzing target (kissfft or all)'
+        required: false
+        default: 'kissfft'
+      cores:
+        description: 'Number of CPU cores to use (default: 2)'
+        required: false
+        default: '2'
+
+jobs:
+  fuzz-kissfft:
+    name: Fuzz kissfft library
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/google/oss-fuzz-base:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache AFL++ corpus
+      uses: actions/cache@v3
+      with:
+        path: |
+          .afl-cov/
+          findings/
+        key: ${{ runner.os }}-afl-corpus-${{ hashFiles('lib/kissfft/**', 'src/**') }}
+        restore-keys: |
+          ${{ runner.os }}-afl-corpus-
+
+    - name: Install dependencies
+      run: |
+        apt-get update && apt-get install -y cmake clang libgl1-mesa-dev
+
+    - name: Build kissfft with fuzzing instrumentation
+      run: |
+        mkdir -p build-fuzz
+        cd build-fuzz
+        
+        # Build kissfft with AFL++ instrumentation
+        CC=afl-cc CXX=afl-c++ cmake .. -DCMAKE_BUILD_TYPE=Debug
+        make -j$(nproc)
+
+    - name: Prepare fuzzing targets
+      run: |
+        # Create a simple fuzzing target for kissfft
+        cat > fuzz_target.cpp << 'EOF'
+        #include "../lib/kissfft/kiss_fft.h"
+        #include <stdint.h>
+        #include <stdlib.h>
+        #include <cmath>
+        #include <algorithm>
+        
+        extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
+            if (size < 2 * sizeof(float)) return 0;
+            
+            // Convert input to float samples
+            const float *samples = reinterpret_cast<const float*>(data);
+            int nfft = size / sizeof(float);
+            
+            // Ensure nfft is a power of 2 for FFT (max 2^16 for performance)
+            int power_of_2 = 1;
+            while (power_of_2 * 2 <= nfft && power_of_2 <= 65536) power_of_2 *= 2;
+            nfft = std::min(power_of_2, 65536);
+            
+            // Allocate buffers
+            kiss_fft_cpx *in = new kiss_fft_cpx[nfft/2 + 1];
+            kiss_fft_cpx *out = new kiss_fft_cpx[nfft/2 + 1];
+            kiss_fftr_cfg cfg = kiss_fftr_alloc(nfft, 0, 0, 0);
+            
+            if (!in || !out || !cfg) {
+                delete[] in;
+                delete[] out;
+                if (cfg) kiss_fftr_free(cfg);
+                return 0;
+            }
+            
+            // Fill input with fuzzed data (ensure finite values)
+            for (int i = 0; i < nfft/2 + 1; i++) {
+                float r = samples[i*2];
+                float im = samples[i*2 + 1];
+                in[i].r = std::isfinite(r) ? r : 0.0f;
+                in[i].i = std::isfinite(im) ? im : 0.0f;
+            }
+            
+            // Perform FFT
+            kiss_fftr(cfg, in, out);
+            
+            // Cleanup
+            delete[] in;
+            delete[] out;
+            kiss_fftr_free(cfg);
+            
+            return 0;
+        }
+        EOF
+        
+        # Compile fuzzing target
+        afl-c++ -o fuzz_target fuzz_target.cpp -I../lib/kissfft build-fuzz/libkissfft.a -lm
+
+    - name: Run AFL++ fuzzer
+      run: |
+        mkdir -p findings
+        FUZZ_TIME=${{ github.event.inputs.fuzz-time || '600' }}
+        CORES=${{ github.event.inputs.cores || '2' }}
+        
+        # Run AFL++ with parallel fuzzing if multiple cores
+        if [ "$CORES" -gt 1 ]; then
+          # Split into multiple instances
+          for i in $(seq 1 $CORES); do
+            mkdir -p findings_$i
+            timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings_$i -t 5000 -- ./fuzz_target -M main_$i &
+          done
+          wait
+          # Merge findings
+          mkdir -p findings
+          for i in $(seq 1 $CORES); do
+            cp findings_$i/queue/* findings/ 2>/dev/null || true
+            cp findings_$i/crashes/* findings/ 2>/dev/null || true
+          done
+        else
+          timeout $FUZZ_TIME afl-fuzz -i /dev/null -o findings -t 5000 -- ./fuzz_target || true
+        fi
+
+    - name: Upload fuzzing findings
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: fuzzing-findings
+        path: findings/
+        retention-days: 30
+
+    - name: Upload fuzzing corpus
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: fuzzing-corpus
+        path: findings/queue/
+        retention-days: 7

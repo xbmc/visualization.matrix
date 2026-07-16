@@ -1,0 +1,19 @@
+# Code Owners for visualization.matrix
+
+# Default owners for the entire repository
+* @MarcelRaschke
+
+# Specific paths
+/src/ @MarcelRaschke
+/lib/ @MarcelRaschke
+/visualization.matrix/ @MarcelRaschke
+
+# Documentation
+*.md @MarcelRaschke
+
+# GitHub Workflows
+.github/workflows/ @MarcelRaschke
+
+# Security files
+SECURITY.md @MarcelRaschke
+CONTRIBUTING.md @MarcelRaschke

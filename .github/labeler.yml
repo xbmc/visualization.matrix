@@ -1,0 +1,60 @@
+# GitHub Labeler Configuration
+
+# Labels to apply based on file paths
+labels:
+  - name: "security"
+    color: "d73a4a"
+    description: "Security-related changes or vulnerabilities"
+    files:
+      - SECURITY.md
+      - .github/workflows/codeql.yml
+      - .github/workflows/trivy.yml
+      - .github/workflows/fuzzing.yml
+
+  - name: "documentation"
+    color: "0075ca"
+    description: "Changes to documentation"
+    files:
+      - README.md
+      - CONTRIBUTING.md
+      - LICENSE.md
+      - .github/ISSUE_TEMPLATE/*
+      - .github/PULL_REQUEST_TEMPLATE.md
+
+  - name: "ci/cd"
+    color: "000000"
+    description: "Changes to CI/CD pipelines"
+    files:
+      - .github/workflows/*
+      - azure-pipelines.yml
+      - .travis.yml
+      - appveyor.yml
+
+  - name: "bug"
+    color: "d73a4a"
+    description: "Bug fixes"
+    files:
+      - src/*
+      - lib/*
+
+  - name: "enhancement"
+    color: "a2eeef"
+    description: "New features or improvements"
+    files:
+      - src/*
+      - lib/*
+
+  - name: "dependencies"
+    color: "0366d6"
+    description: "Dependency updates"
+    files:
+      - CMakeLists.txt
+      - depends/*
+
+  - name: "build"
+    color: "000000"
+    description: "Build-related changes"
+    files:
+      - CMakeLists.txt
+      - Find*.cmake
+      - debian/*

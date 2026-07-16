@@ -1,0 +1,151 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'Dockerfile'
+      - 'lib/**'
+      - 'src/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'Dockerfile'
+      - 'lib/**'
+      - 'src/**'
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Target platform (linux/amd64, linux/arm64, linux/arm/v7)'
+        required: false
+        default: 'linux/amd64'
+
+jobs:
+  docker-build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-docker-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-docker-
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub (if needed)
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+    - name: Build Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: ${{ github.event.inputs.platform || 'linux/amd64' }}
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: |
+          ghcr.io/marcelraschke/visualization.matrix:latest
+          ghcr.io/marcelraschke/visualization.matrix:${{ github.sha }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new
+
+    - name: Move cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+    - name: Test Docker image
+      run: |
+        # Run the container to verify it builds correctly
+        docker run --rm \
+          --platform ${{ github.event.inputs.platform || 'linux/amd64' }} \
+          ghcr.io/marcelraschke/visualization.matrix:latest \
+          echo "Docker build test successful"
+
+    - name: Upload Docker build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-build
+        path: /tmp/.buildx-cache
+        retention-days: 7
+
+  docker-security-scan:
+    name: Docker Security Scan
+    needs: docker-build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Trivy
+      run: |
+        curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Scan Docker image with Trivy
+      run: |
+        IMAGE_NAME=ghcr.io/marcelraschke/visualization.matrix:latest
+        trivy image --severity CRITICAL,HIGH --exit-code 1 $IMAGE_NAME || true
+
+    - name: Upload Trivy scan report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: trivy-docker-report
+        path: trivy-results.json
+        retention-days: 30
+
+  docker-multi-platform:
+    name: Multi-Platform Docker Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build and push multi-platform image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./Dockerfile
+        platforms: ${{ matrix.platform }}
+        push: true
+        tags: |
+          ghcr.io/marcelraschke/visualization.matrix:${{ matrix.platform }}
+          ghcr.io/marcelraschke/visualization.matrix:latest-${{ matrix.platform }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max

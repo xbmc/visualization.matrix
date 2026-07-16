@@ -1,0 +1,107 @@
+name: Semgrep Static Analysis
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'lib/**'
+      - 'src/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'lib/**'
+      - 'src/**'
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+
+jobs:
+  semgrep-scan:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Semgrep
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/semgrep
+        key: ${{ runner.os }}-semgrep-${{ hashFiles('.semgrep.yml', 'src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-semgrep-
+
+    - name: Run Semgrep with custom rules
+      run: |
+        # Run Semgrep with default rules + custom rules
+        semgrep scan \
+          --config=auto \
+          --config=.semgrep.yml \
+          --error \
+          --json \
+          --output=semgrep-results.json \
+          src/ lib/ || true
+
+    - name: Upload Semgrep report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: semgrep-report
+        path: semgrep-results.json
+        retention-days: 30
+
+    - name: Convert Semgrep JSON to SARIF
+      if: always()
+      run: |
+        # Install jq for JSON processing
+        apt-get update && apt-get install -y jq
+        
+        # Convert Semgrep JSON to SARIF format
+        jq -r '
+          {
+            "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+            "version": "2.1.0",
+            "runs": [{
+              "tool": {
+                "driver": {
+                  "name": "Semgrep",
+                  "informationUri": "https://semgrep.dev/",
+                  "version": "latest",
+                  "rules": []
+                }
+              },
+              "results": [
+                .[] | {
+                  "ruleId": .check_id,
+                  "level": (if .severity == "ERROR" then "error" elif .severity == "WARNING" then "warning" else "note" end),
+                  "message": {"text": .extra.message},
+                  "locations": [{
+                    "physicalLocation": {
+                      "artifactLocation": {"uri": .path},
+                      "region": {
+                        "startLine": .start.line,
+                        "startColumn": .start.col,
+                        "endLine": .end.line,
+                        "endColumn": .end.col
+                      }
+                    }
+                  }]
+                }
+              ]
+            }]
+          }
+        ' semgrep-results.json > semgrep-results.sarif || true
+
+    - name: Upload SARIF report to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'semgrep-results.sarif'

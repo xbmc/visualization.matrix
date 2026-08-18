@@ -1,0 +1,69 @@
+# Git directory
+.git
+.gitignore
+
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.lib
+*.dylib
+
+# CMake files
+CMakeCache.txt
+CMakeFiles/
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# Documentation (not needed in image)
+*.md
+LICENSE*
+CHANGELOG*
+README*
+CONTRIBUTING*
+CODE_OF_CONDUCT*
+SECURITY*
+DEPENDENCY_POLICY*
+
+# GitHub specific files
+.github/
+.gitattributes
+
+# Editor files
+*.project
+*.cproject
+.classpath
+.settings/
+
+# Debian build files
+debian/
+*.deb
+
+# Kodi specific
+xbmc/
+kodi/
+
+# Addon output
+visualization.matrix/addon.xml
+*.zip
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/

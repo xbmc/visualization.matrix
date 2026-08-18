@@ -1,0 +1,77 @@
+name: Cache Management
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'CMakeLists.txt'
+      - 'src/**'
+      - 'lib/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'CMakeLists.txt'
+      - 'src/**'
+      - 'lib/**'
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 0'  # Run every Sunday at midnight
+
+jobs:
+  cleanup-cache:
+    name: Cleanup Cache
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cleanup old caches
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const caches = await github.rest.actions.getActionsCacheList({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+          
+          const now = new Date();
+          const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          
+          for (const cache of caches.data.actions_caches) {
+            const cacheDate = new Date(cache.created_at);
+            if (cacheDate < oneWeekAgo) {
+              console.log(`Deleting cache ${cache.id} created at ${cache.created_at}`);
+              await github.rest.actions.deleteActionsCacheById({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                cache_id: cache.id,
+              });
+            }
+          }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  prewarm-cache:
+    name: Prewarm Cache
+    runs-on: ubuntu-latest
+    needs: cleanup-cache
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache CMake dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/CMake
+        key: prewarm-cmake-${{ hashFiles('CMakeLists.txt') }}
+        restore-keys: |
+          prewarm-cmake-
+
+    - name: Install and cache build dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cmake g++ make libgl1-mesa-dev libglu1-mesa-dev ninja-build
+        echo "Dependencies installed and cached"

@@ -1,0 +1,55 @@
+name: SBOM Generation
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+  release:
+    types: [ published ]
+
+jobs:
+  generate-sbom:
+    name: Generate SBOM with Syft
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install Syft
+      run: |
+        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+    - name: Generate SBOM
+      run: |
+        syft dir:. -o spdx-json --file sbom.spdx.json
+        syft dir:. -o cyclonedx-json --file sbom.cyclonedx.json
+
+    - name: Upload SBOM artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: sbom
+        path: |
+          sbom.spdx.json
+          sbom.cyclonedx.json
+        retention-days: 90
+
+    - name: Upload SBOM to GitHub Release (if tag)
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: sbom.spdx.json
+        asset_path: sbom.spdx.json
+        asset_content_type: application/json
+
+    - name: Upload SBOM to GitHub Release (CycloneDX)
+      if: github.event_name == 'release'
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: sbom.cyclonedx.json
+        asset_path: sbom.cyclonedx.json
+        asset_content_type: application/json

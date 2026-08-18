@@ -1,0 +1,74 @@
+name: Code Formatting
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+  workflow_dispatch:
+
+jobs:
+  clang-format-check:
+    name: clang-format Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format-14
+
+    - name: Check code formatting
+      run: |
+        # Find all C++ files
+        find . -name "*.cpp" -o -name "*.h" -o -name "*.c" | grep -v ".git" | while read file; do
+          if ! clang-format-14 --dry-run --Werror "$file"; then
+            echo "::error file=$file::Code formatting issues found"
+            exit 1
+          fi
+        done
+
+  clang-format-apply:
+    name: clang-format Apply
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install clang-format
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-format-14
+
+    - name: Apply clang-format
+      run: |
+        # Find and format all C++ files
+        find . -name "*.cpp" -o -name "*.h" -o -name "*.c" | grep -v ".git" | while read file; do
+          clang-format-14 -i "$file"
+        done
+
+    - name: Commit formatting changes
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add .
+        git diff --quiet && git diff --staged --quiet || git commit -m "style: apply clang-format"
+        git push

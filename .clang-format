@@ -1,0 +1,35 @@
+# clang-format configuration for visualization.matrix
+# Based on LLVM style with custom adjustments
+
+BasedOnStyle: LLVM
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+BreakBeforeBraces: Allman
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+IndentCaseLabels: true
+ColumnLimit: 100
+AllowAllParametersOfDeclarationOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+SpacesBeforeTrailingComments: 2
+Cpp11BracedListStyle: true
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+ContinuationIndentWidth: 2
+BinPackParameters: false
+BinPackArguments: false
+PenaltyBreakBeforeFirstCallParameter: 10000
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 1000
+PenaltyReturnTypeOnItsOwnLine: 200
+
+# C++ specific settings
+Standard: Cpp17
+DerivePointerAlignment: true
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+# OpenGL/GLSL specific
+# Keep GLSL shader code formatting simple

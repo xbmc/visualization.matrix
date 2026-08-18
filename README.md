@@ -9,6 +9,11 @@ This is a [Kodi](https://kodi.tv) visualization addon.
 [![Build Status](https://jenkins.kodi.tv/view/Addons/job/xbmc/job/visualization.matrix/job/Matrix/badge/icon)](https://jenkins.kodi.tv/blue/organizations/jenkins/xbmc%2Fvisualization.matrix/branches/)
 <!--[![Build Status](https://ci.appveyor.com/api/projects/status/github/xbmc/visualization.matrix?branch=Matrix&svg=true)](https://ci.appveyor.com/project/xbmc/visualization-matrix?branch=Matrix)-->
 
+### 🛡️ Security
+
+This project follows a [Security Policy](SECURITY.md) for responsible vulnerability disclosure. 
+We use **GitHub CodeQL**, **clang-tidy**, and **cppcheck** for static code analysis to ensure security and quality.
+
 ### Screenshot
 
 

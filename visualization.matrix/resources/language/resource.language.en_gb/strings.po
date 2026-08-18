@@ -139,3 +139,7 @@ msgstr ""
 msgctxt "#30107"
 msgid "Clean rain with waveform envelope"
 msgstr ""
+
+msgctxt "#30109"
+msgid "Odysseus"
+msgstr ""

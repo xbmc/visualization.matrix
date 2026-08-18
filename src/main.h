@@ -13,7 +13,11 @@
 #include <glm/ext.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "kissfft/kiss_fft.h"
+#include <kissfft/kiss_fft.h>
+
+#include <vector>
+#include <string>
+#include <memory>
 
 class ATTRIBUTE_HIDDEN CVisualizationMatrix
   : public kodi::addon::CAddonBase
@@ -22,6 +26,12 @@ class ATTRIBUTE_HIDDEN CVisualizationMatrix
 public:
   CVisualizationMatrix();
   ~CVisualizationMatrix() override;
+
+  // Disable copy and move
+  CVisualizationMatrix(const CVisualizationMatrix&) = delete;
+  CVisualizationMatrix& operator=(const CVisualizationMatrix&) = delete;
+  CVisualizationMatrix(CVisualizationMatrix&&) = delete;
+  CVisualizationMatrix& operator=(CVisualizationMatrix&&) = delete;
 
   bool Start(int channels, int samplesPerSec, int bitsPerSample, std::string songName) override;
   void Stop() override;
@@ -47,76 +57,77 @@ private:
   GLuint CreateTexture(const GLvoid* data, GLint format, unsigned int w, unsigned int h, GLint internalFormat, GLint scaling, GLint repeat);
   GLuint CreateTexture(const std::string& file, GLint internalFormat, GLint scaling, GLint repeat);
   float BlackmanWindow(float in, size_t i, size_t length);
-  void SmoothingOverTime(float* outputBuffer, float* lastOutputBuffer, kiss_fft_cpx* inputBuffer, size_t length, float smoothingTimeConstant, unsigned int fftSize);
+  void SmoothingOverTime(std::vector<float>& outputBuffer, const std::vector<float>& lastOutputBuffer, 
+                         kiss_fft_cpx* inputBuffer, size_t length, float smoothingTimeConstant, unsigned int fftSize);
   float LinearToDecibels(float linear);
   int DetermineBitsPrecision();
   bool UpdateAlbumart();
   void GatherDefines();
-  //double MeasurePerformance(const std::string& shaderPath, int size);
 
+  // FFT configuration
+  static constexpr size_t AUDIO_BUFFER = 1024;
+  static constexpr size_t NUM_BANDS = AUDIO_BUFFER / 2;
+
+  // Audio processing
   kiss_fft_cfg m_kissCfg;
-  GLubyte* m_audioData;
-  float* m_magnitudeBuffer;
-  float* m_pcm;
+  std::vector<GLubyte> m_audioData;
+  std::vector<float> m_magnitudeBuffer;
+  std::vector<float> m_pcm;
 
+  // State
   bool m_initialized = false;
   int64_t m_initialTime = 0; // in ms
   double m_lastAlbumChange = 0;
   bool m_AlbumNeedsUpload = true;
   bool m_lowpower = false;
-  float m_albumX = 0.0;
-  float m_albumY = 0.0;
+  float m_albumX = 0.0f;
+  float m_albumY = 0.0f;
   int m_bitsPrecision = 0;
   int m_currentPreset = 0;
   float m_dotMode = false;
-  float m_dotSize = 0.0;
-  float m_fallSpeed = 0.25;
-  float m_distortThreshold = 0.0;
-  float m_noiseFluctuation = 0.0;
-  float m_rainHighlights = 0.0;
+  float m_dotSize = 0.0f;
+  float m_fallSpeed = 0.25f;
+  float m_distortThreshold = 0.0f;
+  float m_noiseFluctuation = 0.0f;
+  float m_rainHighlights = 0.0f;
   bool m_crtCurve = false;
 
   int m_samplesPerSec = 0; // Given by Start(...)
   bool m_needsUpload = true; // Set by AudioData(...) to mark presence of data
 
-  std::string m_albumArt = "";
-  std::string m_defines = "";
+  std::string m_albumArt;
+  std::string m_defines;
+  std::string m_usedShaderFile;
 
-  //GLint m_attrResolutionLoc = 0;
+  // OpenGL locations
   GLint m_attrGlobalTimeLoc = 0;
   GLint m_attrAlbumPositionLoc = 0;
   GLint m_attrAlbumRGBLoc = 0;
-  //GLint m_attrChannelTimeLoc = 0;
-  //GLint m_attrMouseLoc = 0;
-  //GLint m_attrDateLoc = 0;
-  //GLint m_attrSampleRateLoc = 0;
-  //GLint m_attrChannelResolutionLoc = 0;
   GLint m_attrChannelLoc[4] = {0};
   GLuint m_channelTextures[4] = {0};
-  //GLint m_attrDotSizeLoc = 0;
 
   kodi::gui::gl::CShaderProgram m_matrixShader;
-  //kodi::gui::gl::CShaderProgram m_displayShader;
 
-  struct
+  struct DotColor
   {
-    float red;
-    float green;
-    float blue;
+    float red = 0.0f;
+    float green = 0.0f;
+    float blue = 0.0f;
   } m_dotColor;
 
-  struct
+  struct State
   {
-    GLuint vertex_buffer;
-    GLuint attr_vertex_e;
-    GLuint attr_vertex_r, uTexture;
-    GLuint effect_fb;
-    GLuint framebuffer_texture;
-    GLuint uScale;
-    int fbwidth, fbheight;
+    GLuint vertex_buffer = 0;
+    GLuint attr_vertex_e = 0;
+    GLuint attr_vertex_r = 0;
+    GLuint uTexture = 0;
+    GLuint effect_fb = 0;
+    GLuint framebuffer_texture = 0;
+    GLuint uScale = 0;
+    int fbwidth = 0;
+    int fbheight = 0;
   } m_state;
 
-  std::string m_usedShaderFile;
   struct ShaderPath
   {
     bool audio = false;

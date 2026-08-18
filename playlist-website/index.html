@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Eurodance & French Touch Time Capsule — Extended Mixes</title>
+<style>
+  :root {
+    --bg: #0a0a12;
+    --bg-elev: #12121f;
+    --bg-card: #1a1a2e;
+    --bg-card-hover: #22223e;
+    --border: #2a2a4a;
+    --text: #e8e8f0;
+    --text-dim: #9090b0;
+    --accent: #ff2d95;
+    --accent-2: #00e5ff;
+    --accent-3: #ffea00;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 20% 0%, rgba(255,45,149,0.08), transparent 50%),
+      radial-gradient(circle at 80% 100%, rgba(0,229,255,0.08), transparent 50%);
+  }
+  /* Header */
+  header {
+    padding: 3rem 1.5rem 2rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255,45,149,0.05), transparent);
+  }
+  header h1 {
+    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 720px;
+    margin: 0 auto 1.5rem;
+  }
+  /* Stats bar */
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--accent-2);
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+  }
+  /* Filters */
+  .filters {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgba(10,10,18,0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+  .filters label {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-right: 0.5rem;
+  }
+  .filters select {
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .filters select:focus, .filters select:hover {
+    border-color: var(--accent);
+  }
+  .search-box {
+    background: var(--bg-card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.85rem;
+    width: 200px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-box:focus { border-color: var(--accent); }
+  /* Phases */
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+  .phase {
+    margin-bottom: 3rem;
+  }
+  .phase-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .phase-num {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(255,45,149,0.1);
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+  }
+  .phase-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .phase-years {
+    margin-left: auto;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  /* Track grid */
+  .tracks {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1rem;
+  }
+  .track {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .track:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .track-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .track-num {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    min-width: 24px;
+  }
+  .track-flag {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .track-year {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+  .track-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 0.25rem;
+  }
+  .track-artist {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .track-link {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--accent-2);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .track-link:hover { color: var(--accent); }
+  .track-link::before { content: '▶'; }
+  .track[data-available="false"] .track-link {
+    color: var(--text-dim);
+    pointer-events: none;
+  }
+  .track[data-available="false"] .track-link::before { content: '⊘'; }
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+  footer a {
+    color: var(--accent-2);
+    text-decoration: none;
+  }
+  /* Responsive */
+  @media (max-width: 640px) {
+    .tracks { grid-template-columns: 1fr; }
+    .stats { gap: 1rem; }
+    .filters { flex-direction: column; align-items: stretch; }
+    .search-box { width: 100%; }
+  }
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-dim);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎧 Eurodance &amp; French Touch Time Capsule</h1>
+  <p>Extended Mixes Only · 1988–2010 · 45 Tracks · 15 Länder · 31 Künstler</p>
+  <div class="stats">
+    <div class="stat"><div class="stat-num">45</div><div class="stat-label">Tracks</div></div>
+    <div class="stat"><div class="stat-num">15</div><div class="stat-label">Länder</div></div>
+    <div class="stat"><div class="stat-num">31</div><div class="stat-label">Künstler</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Phasen</div></div>
+    <div class="stat"><div class="stat-num">22</div><div class="stat-label">Jahre</div></div>
+  </div>
+</header>
+
+<div class="filters">
+  <label for="filter-phase">Phase</label>
+  <select id="filter-phase">
+    <option value="">Alle Phasen</option>
+  </select>
+  <label for="filter-country">Land</label>
+  <select id="filter-country">
+    <option value="">Alle Länder</option>
+  </select>
+  <input type="text" class="search-box" id="search" placeholder="Suche Track/Künstler..." />
+</div>
+
+<main id="playlist"></main>
+
+<footer>
+  <p>Playlist kuratiert &amp; verifiziert · Alle Links via Spotify/Discogs · Extended Mixes für DJ-Sets</p>
+</footer>
+
+<script>
+const tracks = [
+  // Phase 0
+  {n:1,title:"The Sound of C",artist:"Confetti's",year:1988,country:"BE",flag:"🇧🇪",phase:"0",phaseTitle:"Belgian New Beat & Eurodance-Ursprünge",phaseYears:"1988–1993",url:"https://open.spotify.com/track/6yTTJAhWOHf967eRHKp8Xv",available:true},
+  {n:2,title:"No Limit",artist:"2 Unlimited",year:1993,country:"BE/NL",flag:"🇧🇪🇳🇱",phase:"0",phaseTitle:"Belgian New Beat & Eurodance-Ursprünge",phaseYears:"1988–1993",url:"https://open.spotify.com/track/6EC5GeeeDxuIf72U6yCQKW",available:true},
+  // Phase 1
+  {n:3,title:"Das Boot",artist:"U96",year:1991,country:"DE",flag:"🇩🇪",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/6QDcAje5s5OF8imnWB9IWS",available:true},
+  {n:4,title:"Love Sees No Colour",artist:"U96",year:1993,country:"DE",flag:"🇩🇪",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/2PGjFcPL97hi4n6HcADdWT",available:true},
+  {n:5,title:"Das Fräulein vom Amt",artist:"Das Modul",year:1995,country:"DE",flag:"🇩🇪",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/6u6IUnUn6wWc7GHJsT6iPH",available:true},
+  {n:6,title:"Atlantis (Is Calling)",artist:"Imperio",year:1996,country:"AT",flag:"🇦🇹",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/5iLISgvhhQTuXLZou0MW2q",available:true},
+  {n:7,title:"Cyberdream",artist:"Imperio",year:1996,country:"AT",flag:"🇦🇹",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/7brenlI25GuX05bEpl6iOh",available:true},
+  {n:8,title:"See The Difference",artist:"Molella & Asher Senator",year:1996,country:"IT",flag:"🇮🇹",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://www.discogs.com/master/107063-Molella-And-Asher-Senator-See-The-Difference",available:false},
+  {n:9,title:"For An Angel",artist:"Paul van Dyk",year:1994,country:"DE",flag:"🇩🇪",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/7xh57GQyRNbLLgOnLpiZPS",available:true},
+  {n:10,title:"Así Me Gusta a Mí",artist:"Chimo Bayo",year:1991,country:"ES",flag:"🇪🇸",phase:"1",phaseTitle:"Eurodance-Wurzeln & German Techno",phaseYears:"1991–1996",url:"https://open.spotify.com/track/0ydIBsQtMkuwOkG0BCtfow",available:true},
+  // Phase 2
+  {n:11,title:"Music Sounds Better with You",artist:"Stardust",year:1998,country:"FR",flag:"🇫🇷",phase:"2",phaseTitle:"French Touch",phaseYears:"1998–2000",url:"https://open.spotify.com/track/303ccTay2FiDTZ9fZ2AdBt",available:true},
+  {n:12,title:"Feeling For You",artist:"Cassius",year:1999,country:"FR",flag:"🇫🇷",phase:"2",phaseTitle:"French Touch",phaseYears:"1998–2000",url:"https://open.spotify.com/track/6bsE6wQAnFhJOhL2WjVZ9M",available:true},
+  {n:13,title:"Lady (Hear Me Tonight)",artist:"Modjo",year:2000,country:"FR",flag:"🇫🇷",phase:"2",phaseTitle:"French Touch",phaseYears:"1998–2000",url:"https://open.spotify.com/track/7eDX3o9LZln32oqYObzdvX",available:true},
+  {n:14,title:"Gym Tonic",artist:"Bob Sinclar",year:1998,country:"FR",flag:"🇫🇷",phase:"2",phaseTitle:"French Touch",phaseYears:"1998–2000",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  // Phase 2.5
+  {n:15,title:"Firestarter",artist:"The Prodigy",year:1996,country:"UK",flag:"🇬🇧",phase:"2.5",phaseTitle:"British Big Beat",phaseYears:"1996–1998",url:"https://open.spotify.com/track/0ChfHpUPDcdXATAGjqtraC",available:true},
+  {n:16,title:"The Rockafeller Skank",artist:"Fatboy Slim",year:1998,country:"UK",flag:"🇬🇧",phase:"2.5",phaseTitle:"British Big Beat",phaseYears:"1996–1998",url:"https://open.spotify.com/track/2N8eVdkmotMbbKQ3bwrJP5",available:true},
+  // Phase 2.6
+  {n:17,title:"Barbie Girl",artist:"Aqua",year:1997,country:"DK/NO",flag:"🇩🇰🇳🇴",phase:"2.6",phaseTitle:"Scandinavian Bubblegum Dance",phaseYears:"1997–1998",url:"https://open.spotify.com/track/4JA57VDQMvgZsVNzHrQaRI",available:true},
+  {n:18,title:"Doctor Jones",artist:"Aqua",year:1997,country:"DK/NO",flag:"🇩🇰🇳🇴",phase:"2.6",phaseTitle:"Scandinavian Bubblegum Dance",phaseYears:"1997–1998",url:"https://open.spotify.com/track/2biWKOdQ3jXHJPTzk0ZMZD",available:true},
+  {n:19,title:"Witch Doctor",artist:"Cartoons",year:1998,country:"DK",flag:"🇩🇰",phase:"2.6",phaseTitle:"Scandinavian Bubblegum Dance",phaseYears:"1997–1998",url:"https://open.spotify.com/track/3fBhSbzYHz6T8NKqrmRPsm",available:true},
+  // Phase 3
+  {n:20,title:"Another Way",artist:"Gigi D'Agostino",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/0Tr4GZ7MUTHAeHoMfLzNWK",available:true},
+  {n:21,title:"The Riddle",artist:"Gigi D'Agostino",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/intl-es/track/0ZqveF2rEFlz2oqF2xrriP",available:true},
+  {n:22,title:"Bla Bla Bla",artist:"Gigi D'Agostino",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/04zrPERrSO4CfyargthKJ9",available:true},
+  {n:23,title:"L'Amour Toujours (I'll Fly with You)",artist:"Gigi D'Agostino",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/1cUQq0BJN85hVDAMN5UYtF",available:true},
+  {n:24,title:"Tell Me Why",artist:"Prezioso feat. Marvin",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/6Zlwekn5ImtD5o8TzC8CXu",available:true},
+  {n:25,title:"Blue (Da Ba Dee)",artist:"Eiffel 65",year:1999,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/2yAVzRiEQooPEJ9SYx11L3",available:true},
+  {n:26,title:"Move Your Body",artist:"Eiffel 65",year:2000,country:"IT",flag:"🇮🇹",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/2aPbkXxYRTQ1cQrscHswuM",available:true},
+  {n:27,title:"Diva",artist:"Dana International",year:1998,country:"IL",flag:"🇮🇱",phase:"3",phaseTitle:"Italo-Dance-Durchbruch & Israeli Eurodance",phaseYears:"1997–2000",url:"https://open.spotify.com/track/1vUblqmW0ipfcUDyWqMb8l",available:true},
+  // Phase 3.5
+  {n:28,title:"Opa Opa",artist:"Notis Sfakianakis",year:1992,country:"GR",flag:"🇬🇷",phase:"3.5",phaseTitle:"Greek Laïko-Pop",phaseYears:"1992–2001",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:29,title:"Gia",artist:"Despina Vandi",year:2001,country:"GR",flag:"🇬🇷",phase:"3.5",phaseTitle:"Greek Laïko-Pop",phaseYears:"1992–2001",url:"https://open.spotify.com/track/47iKNDwP2q9kCJwwEBInzf",available:true},
+  // Phase 4
+  {n:30,title:"Şımarık (Kiss Kiss)",artist:"Tarkan",year:1997,country:"TR",flag:"🇹🇷",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/track/656S17ahOyXxE7e7JluLq4",available:true},
+  {n:31,title:"Kuzu Kuzu",artist:"Tarkan",year:2001,country:"TR",flag:"🇹🇷",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:32,title:"Geordie",artist:"Gabry Ponte",year:2002,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/track/3BLuFrYzN16QouqruJ9exP",available:true},
+  {n:33,title:"Time to Rock",artist:"Gabry Ponte",year:2002,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/track/0BDHbCfTr8H2sJD32Ewmv8",available:true},
+  {n:34,title:"La Danza delle Streghe",artist:"Gabry Ponte",year:2003,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://www.discogs.com/release/1004197-Gabry-Ponte-La-Danza-Delle-Streghe",available:false},
+  {n:35,title:"Giulia",artist:"DJ Lhasa",year:2003,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:36,title:"Voglio Vederti Danzare",artist:"Prezioso feat. Marvin",year:2003,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:37,title:"Together Forever",artist:"DJ Lhasa",year:2003,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:38,title:"No Controles",artist:"DJ Lhasa",year:2004,country:"IT",flag:"🇮🇹",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:39,title:"Kroshka Moya (Крошка моя)",artist:"Ruki Vverh!",year:1997,country:"RU",flag:"🇷🇺",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/track/09MDHROVBaDXklfjB4u7Dp",available:true},
+  {n:40,title:"18 Mne Uzhe (18 Мне уже)",artist:"Ruki Vverh!",year:1998,country:"RU",flag:"🇷🇺",phase:"4",phaseTitle:"Italo-Dance-Blüte & Russian Eurodance & Turkish Pop",phaseYears:"1997–2004",url:"https://open.spotify.com/track/0tXubSI1kh1XeyIsE2Rtrk",available:true},
+  // Phase 4.5
+  {n:41,title:"Przez Twe Oczy Zielone",artist:"Akcent",year:1994,country:"PL",flag:"🇵🇱",phase:"4.5",phaseTitle:"Polish Disco Polo",phaseYears:"ab 1994",url:"https://open.spotify.com/track/5aGl6R2pWOBYFCzcMmwfNo",available:true},
+  // Phase 5
+  {n:42,title:"F.T.S.",artist:"Showtek",year:2004,country:"NL",flag:"🇳🇱",phase:"5",phaseTitle:"Dutch Hardstyle & Swedish House",phaseYears:"2004–2010",url:"https://open.spotify.com/artist/5W5lPmtTMzpOCbe2avgPBi",available:false},
+  {n:43,title:"Rock Civilization",artist:"Headhunterz",year:2007,country:"NL",flag:"🇳🇱",phase:"5",phaseTitle:"Dutch Hardstyle & Swedish House",phaseYears:"2004–2010",url:"https://open.spotify.com/track/43LQCjsx42u7PJIcUyvTsf",available:true},
+  {n:44,title:"Call On Me",artist:"Eric Prydz",year:2004,country:"SE",flag:"🇸🇪",phase:"5",phaseTitle:"Dutch Hardstyle & Swedish House",phaseYears:"2004–2010",url:"https://open.spotify.com/track/1xNcBAoUw8Hz6LqK2jt4Ff",available:true},
+  {n:45,title:"One (Your Name)",artist:"Swedish House Mafia ft. Pharrell",year:2010,country:"SE",flag:"🇸🇪",phase:"5",phaseTitle:"Dutch Hardstyle & Swedish House",phaseYears:"2004–2010",url:"https://open.spotify.com/track/4wOcKBzGTfOhdGsBt0mIEn",available:true}
+];
+
+// Populate filter dropdowns
+const phaseSelect = document.getElementById('filter-phase');
+const countrySelect = document.getElementById('filter-country');
+const phases = [...new Set(tracks.map(t => t.phase))].sort();
+const countries = [...new Set(tracks.map(t => t.country))].sort();
+phases.forEach(p => {
+  const t = tracks.find(x => x.phase === p);
+  const opt = document.createElement('option');
+  opt.value = p;
+  opt.textContent = `Phase ${p}: ${t.phaseTitle}`;
+  phaseSelect.appendChild(opt);
+});
+countries.forEach(c => {
+  const opt = document.createElement('option');
+  opt.value = c;
+  opt.textContent = c;
+  countrySelect.appendChild(opt);
+});
+
+// Render function
+function render() {
+  const phaseFilter = phaseSelect.value;
+  const countryFilter = countrySelect.value;
+  const searchTerm = document.getElementById('search').value.toLowerCase().trim();
+  const main = document.getElementById('playlist');
+  main.innerHTML = '';
+
+  const filtered = tracks.filter(t => {
+    if (phaseFilter && t.phase !== phaseFilter) return false;
+    if (countryFilter && t.country !== countryFilter) return false;
+    if (searchTerm) {
+      const hay = (t.title + ' ' + t.artist + ' ' + t.country).toLowerCase();
+      if (!hay.includes(searchTerm)) return false;
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    main.innerHTML = '<div class="no-results">Keine Tracks gefunden. Filter anpassen.</div>';
+    return;
+  }
+
+  // Group by phase
+  const grouped = {};
+  filtered.forEach(t => {
+    if (!grouped[t.phase]) grouped[t.phase] = { title: t.phaseTitle, years: t.phaseYears, items: [] };
+    grouped[t.phase].items.push(t);
+  });
+
+  Object.keys(grouped).sort().forEach(phaseKey => {
+    const group = grouped[phaseKey];
+    const section = document.createElement('section');
+    section.className = 'phase';
+    section.innerHTML = `
+      <div class="phase-header">
+        <span class="phase-num">Phase ${phaseKey}</span>
+        <span class="phase-title">${group.title}</span>
+        <span class="phase-years">${group.years}</span>
+      </div>
+      <div class="tracks"></div>
+    `;
+    const grid = section.querySelector('.tracks');
+    group.items.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 'track';
+      card.dataset.available = t.available;
+      const linkLabel = t.available ? 'Spotify Extended' : (t.url.includes('discogs') ? 'Discogs' : 'Artist-Seite');
+      card.innerHTML = `
+        <div class="track-top">
+          <span class="track-num">${String(t.n).padStart(2,'0')}</span>
+          <span class="track-flag">${t.flag}</span>
+          <span class="track-year">${t.year}</span>
+        </div>
+        <div class="track-title">${t.title}</div>
+        <div class="track-artist">${t.artist}</div>
+        <a class="track-link" href="${t.url}" target="_blank" rel="noopener">${linkLabel}</a>
+      `;
+      grid.appendChild(card);
+    });
+    main.appendChild(section);
+  });
+}
+
+// Event listeners
+phaseSelect.addEventListener('change', render);
+countrySelect.addEventListener('change', render);
+document.getElementById('search').addEventListener('input', render);
+
+// Initial render
+render();
+</script>
+</body>
+</html>

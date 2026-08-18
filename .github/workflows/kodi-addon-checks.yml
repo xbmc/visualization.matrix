@@ -1,0 +1,182 @@
+name: Kodi Addon Specific Checks
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'addon.xml'
+      - 'addon.xml.in'
+      - 'visualization.matrix/**'
+      - 'src/**'
+      - 'lib/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - 'addon.xml'
+      - 'addon.xml.in'
+      - 'visualization.matrix/**'
+      - 'src/**'
+      - 'lib/**'
+
+jobs:
+  validate-addon-xml:
+    name: Validate Addon XML
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Validate addon.xml structure
+      run: |
+        # Check if addon.xml exists or needs to be generated
+        if [ -f "addon.xml" ]; then
+          echo "Validating existing addon.xml"
+          xmllint --noout --schema https://raw.githubusercontent.com/xbmc/xbmc/master/xbmc/addons/dtd/addon.dtd addon.xml || true
+        elif [ -f "addon.xml.in" ]; then
+          echo "addon.xml.in found - this will be processed by CMake"
+          # Check for required fields in addon.xml.in
+          grep -q "id=\"visualization.matrix\"" addon.xml.in || { echo "Missing addon id"; exit 1; }
+          grep -q "version=" addon.xml.in || { echo "Missing version"; exit 1; }
+          grep -q "name=" addon.xml.in || { echo "Missing name"; exit 1; }
+          grep -q "provider=" addon.xml.in || { echo "Missing provider"; exit 1; }
+        else
+          echo "No addon.xml or addon.xml.in found"
+          exit 1
+        fi
+
+    - name: Check addon version format
+      run: |
+        if [ -f "addon.xml" ]; then
+          VERSION=$(grep -oP 'version="\K[^"]+' addon.xml)
+        elif [ -f "addon.xml.in" ]; then
+          VERSION=$(grep -oP 'version="\K[^"]+' addon.xml.in)
+        fi
+        
+        if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Version $VERSION does not match semantic versioning (X.Y.Z)"
+          exit 1
+        fi
+        echo "Version $VERSION is valid"
+
+  check-kodi-compatibility:
+    name: Check Kodi Compatibility
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check Kodi API usage
+      run: |
+        # Check for deprecated Kodi API calls
+        DEPRECATED_APIS=(
+          "xbmc->Log"  # Use CLog instead
+          "xbmc->Output"  # Use CLog instead
+          "ADDON::CAddon"  # Use kodi::addon::CAddon
+        )
+        
+        for api in "${DEPRECATED_APIS[@]}"; do
+          if grep -r "$api" src/ lib/ visualization.matrix/ 2>/dev/null; then
+            echo "⚠️  Deprecated Kodi API found: $api"
+            echo "Please update to use the current Kodi API"
+          fi
+        done
+
+    - name: Check for required Kodi includes
+      run: |
+        REQUIRED_INCLUDES=(
+          "kodi/addon-instance/Visualization.h"
+          "kodi/General.h"
+          "kodi/gui/gl/GL.h"
+        )
+        
+        for include in "${REQUIRED_INCLUDES[@]}"; do
+          if ! grep -r "#include.*$include" src/ lib/ visualization.matrix/ 2>/dev/null; then
+            echo "⚠️  Recommended Kodi include not found: $include"
+          fi
+        done
+
+  check-visualization-specifics:
+    name: Check Visualization-Specific Requirements
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for required visualization methods
+      run: |
+        REQUIRED_METHODS=(
+          "Create"
+          "Start"
+          "Stop"
+          "Render"
+          "AudioData"
+        )
+        
+        for method in "${REQUIRED_METHODS[@]}"; do
+          if ! grep -r "$method" src/ visualization.matrix/ 2>/dev/null; then
+            echo "⚠️  Required visualization method not found: $method"
+          fi
+        done
+
+    - name: Check for OpenGL/ES compatibility
+      run: |
+        # Check for OpenGL usage
+        if ! grep -r "gl\|GL_\|GLuint\|GLfloat" src/ lib/ visualization.matrix/ 2>/dev/null; then
+          echo "⚠️  No OpenGL usage detected - is this a visualization addon?"
+        fi
+        
+        # Check for GLES compatibility
+        if grep -r "GLES\|OPENGLES" src/ lib/ visualization.matrix/ 2>/dev/null; then
+          echo "✅ OpenGL ES compatibility detected"
+        fi
+
+    - name: Check for thread safety
+      run: |
+        # Check for potential thread safety issues
+        if grep -r "new \|malloc\|free\|delete" src/ lib/ visualization.matrix/ 2>/dev/null; then
+          echo "⚠️  Manual memory management found - consider using smart pointers"
+        fi
+        
+        # Check for mutex usage
+        if ! grep -r "std::mutex\|std::lock_guard\|std::unique_lock" src/ lib/ visualization.matrix/ 2>/dev/null; then
+          echo "ℹ️  No mutex usage detected - ensure thread safety if using multiple threads"
+        fi
+
+  check-performance:
+    name: Check Performance Considerations
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Check for expensive operations in render loop
+      run: |
+        # Check for potentially expensive operations
+        EXPENSIVE_OPS=(
+          "new \[\|malloc"
+          "std::vector::resize"
+          "memcpy\|memset"
+          "printf\|sprintf"
+        )
+        
+        for op in "${EXPENSIVE_OPS[@]}"; do
+          if grep -r "$op" src/ visualization.matrix/ 2>/dev/null; then
+            echo "⚠️  Potentially expensive operation in render path: $op"
+          fi
+        done
+
+    - name: Check for FFT optimization
+      run: |
+        # Check kissfft usage
+        if grep -r "kiss_fft\|kiss_fftr" src/ lib/ 2>/dev/null; then
+          echo "✅ FFT library (kissfft) detected"
+          
+          # Check for FFT size validation
+          if ! grep -r "power.*2\|nfft.*2" src/ 2>/dev/null; then
+            echo "⚠️  Consider validating FFT size is a power of 2"
+          fi
+        fi

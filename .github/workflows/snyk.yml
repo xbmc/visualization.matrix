@@ -1,0 +1,87 @@
+name: Snyk Security Scan
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'lib/**'
+      - 'src/**'
+  schedule:
+    - cron: '0 0 * * 1'  # Run every Monday at midnight
+
+jobs:
+  snyk-scan:
+    name: Snyk Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Snyk
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/snyk
+        key: ${{ runner.os }}-snyk-${{ hashFiles('.') }}
+        restore-keys: |
+          ${{ runner.os }}-snyk-
+
+    - name: Run Snyk to check for vulnerabilities
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --all-projects --severity-threshold=high
+
+    - name: Upload Snyk report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: snyk-report
+        path: .snyk
+        retention-days: 30
+
+  snyk-code:
+    name: Snyk Code Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Cache Snyk Code
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/snyk-code
+        key: ${{ runner.os }}-snyk-code-${{ hashFiles('src/**', 'lib/**') }}
+        restore-keys: |
+          ${{ runner.os }}-snyk-code-
+
+    - name: Run Snyk Code
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: code
+        args: test --severity-threshold=high
+
+    - name: Upload Snyk Code report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: snyk-code-report
+        path: .snyk-code
+        retention-days: 30

@@ -1,0 +1,261 @@
+# Semgrep Configuration for visualization.matrix
+# Custom security rules for C++ code analysis
+# Documentation: https://semgrep.dev/docs/writing-rules/rule-ideas/
+
+rules:
+  # ============================================
+  # Memory Safety Rules
+  # ============================================
+
+  - id: unsafe-malloc
+    pattern: malloc($SIZE)
+    message: "Avoid using malloc(). Use new or smart pointers (std::unique_ptr, std::shared_ptr) instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-759: Use of Unsafe Function"
+      category: memory-safety
+
+  - id: unsafe-free
+    pattern: free($PTR)
+    message: "Avoid using free(). Use delete or smart pointers instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-759: Use of Unsafe Function"
+      category: memory-safety
+
+  - id: unsafe-strcpy
+    pattern: strcpy($DST, $SRC)
+    message: "Avoid using strcpy(). Use strncpy() or std::string instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-120: Buffer Copy without Checking Size of Input"
+      category: memory-safety
+
+  - id: unsafe-strcat
+    pattern: strcat($DST, $SRC)
+    message: "Avoid using strcat(). Use strncat() or std::string instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-120: Buffer Copy without Checking Size of Input"
+      category: memory-safety
+
+  - id: unsafe-sprintf
+    pattern: sprintf($BUF, $FMT, ...)
+    message: "Avoid using sprintf(). Use snprintf() instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-134: Use of Externally-Controlled Format String"
+      category: memory-safety
+
+  - id: unsafe-gets
+    pattern: gets($BUF)
+    message: "Never use gets(). It is inherently unsafe. Use fgets() instead."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      cwe: "CWE-242: Use of Unchecked Externally Provided Data"
+      category: memory-safety
+
+  # ============================================
+  # Buffer Overflow Prevention
+  # ============================================
+
+  - id: unbounded-array-access
+    pattern: $ARR[$INDEX]
+    message: "Potential unbounded array access. Ensure INDEX is within bounds."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-125: Out-of-bounds Read"
+      category: memory-safety
+    fix: |
+      if ($INDEX >= 0 && $INDEX < sizeof($ARR)/sizeof($ARR[0])) { $ARR[$INDEX] }
+
+  - id: unsafe-pointer-arithmetic
+    pattern: $PTR + $OFFSET
+    message: "Pointer arithmetic can lead to buffer overflows. Validate offset bounds."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-466: Return of Pointer Value Outside of Expected Range"
+      category: memory-safety
+
+  # ============================================
+  # Kodi-Specific Security Rules
+  # ============================================
+
+  - id: kodi-deprecated-log
+    pattern: xbmc->Log($LEVEL, $MSG)
+    message: "xbmc->Log is deprecated. Use CLog::Log() instead."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      category: kodi-specific
+    fix: CLog::Log($LEVEL, $MSG)
+
+  - id: kodi-deprecated-output
+    pattern: xbmc->Output($LEVEL, $MSG)
+    message: "xbmc->Output is deprecated. Use CLog::Log() instead."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      category: kodi-specific
+    fix: CLog::Log($LEVEL, $MSG)
+
+  - id: kodi-addon-missing-create
+    pattern: class $CLASS : public $KODI_BASE
+    message: "Kodi visualization addons must implement the Create() method."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      category: kodi-specific
+    fix: |
+      class $CLASS : public $KODI_BASE {
+      public:
+        bool Create() override { /* implementation */ }
+      }
+
+  - id: kodi-addon-missing-start
+    pattern: class $CLASS : public $KODI_BASE
+    message: "Kodi visualization addons must implement the Start() method."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      category: kodi-specific
+
+  - id: kodi-addon-missing-stop
+    pattern: class $CLASS : public $KODI_BASE
+    message: "Kodi visualization addons must implement the Stop() method."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      category: kodi-specific
+
+  - id: kodi-addon-missing-render
+    pattern: class $CLASS : public $KODI_BASE
+    message: "Kodi visualization addons must implement the Render() method."
+    languages: [cpp]
+    severity: ERROR
+    metadata:
+      category: kodi-specific
+
+  # ============================================
+  # FFT-Specific Rules (for kissfft)
+  # ============================================
+
+  - id: fft-input-validation
+    pattern: kiss_fftr($CFG, $IN, $OUT)
+    message: "Ensure FFT input is validated for NaN/Inf values to prevent undefined behavior."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      category: fft-specific
+    fix: |
+      for (int i = 0; i < nfft; i++) {
+        if (!std::isfinite($IN[i].r)) $IN[i].r = 0.0f;
+        if (!std::isfinite($IN[i].i)) $IN[i].i = 0.0f;
+      }
+      kiss_fftr($CFG, $IN, $OUT)
+
+  - id: fft-size-power-of-two
+    pattern: kiss_fftr_alloc($NFFT, ...)
+    message: "FFT size should be a power of two for optimal performance."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: fft-specific
+
+  # ============================================
+  # Error Handling
+  # ============================================
+
+  - id: missing-null-check
+    pattern: $PTR->$METHOD(...)
+    message: "Potential null pointer dereference. Add null check before accessing member."
+    languages: [cpp]
+    severity: WARNING
+    metadata:
+      cwe: "CWE-476: NULL Pointer Dereference"
+      category: error-handling
+    fix: if ($PTR) { $PTR->$METHOD(...) }
+
+  - id: missing-exception-handling
+    pattern: throw $EXCEPTION
+    message: "Consider adding exception handling for robust error recovery."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: error-handling
+
+  # ============================================
+  # Performance Rules
+  # ============================================
+
+  - id: expensive-operation-in-loop
+    pattern: |
+      for (...) {
+        $EXPENSIVE_OP(...)
+      }
+    message: "Expensive operation in loop. Consider optimizing or caching."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: performance
+    patterns:
+      - pattern-inside: for (...)
+      - pattern: new $TYPE
+      - pattern: malloc(...)
+      - pattern: memcpy(...)
+
+  - id: use-emplace-back
+    pattern: $VECTOR.push_back($OBJ)
+    message: "Use emplace_back() instead of push_back() for better performance with complex objects."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: performance
+    fix: $VECTOR.emplace_back(...)
+
+  # ============================================
+  # Modern C++ Best Practices
+  # ============================================
+
+  - id: use-const-reference
+    pattern: $TYPE $PARAM
+    message: "Consider passing by const reference to avoid unnecessary copies."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: modern-cpp
+    fix: const $TYPE& $PARAM
+
+  - id: use-nullptr
+    pattern: NULL
+    message: "Use nullptr instead of NULL for modern C++."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: modern-cpp
+    fix: nullptr
+
+  - id: use-auto
+    pattern: $TYPE $VAR = ...
+    message: "Consider using auto for type deduction where appropriate."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: modern-cpp
+
+  - id: use-range-based-for
+    pattern: for (int i = 0; i < $SIZE; i++)
+    message: "Consider using range-based for loop for better readability."
+    languages: [cpp]
+    severity: INFO
+    metadata:
+      category: modern-cpp
+    fix: for (auto& item : $CONTAINER)

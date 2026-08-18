@@ -1,0 +1,98 @@
+name: code-coverage
+
+on:
+  push:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'tests/**'
+      - 'src/**'
+      - 'lib/**'
+  pull_request:
+    branches: [ master, Matrix, Nexus ]
+    paths:
+      - '**.cpp'
+      - '**.h'
+      - '**.c'
+      - 'CMakeLists.txt'
+      - 'tests/**'
+      - 'src/**'
+      - 'lib/**'
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: gcov / lcov
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            cmake \
+            g++ \
+            ninja-build \
+            lcov \
+            libgl1-mesa-dev \
+            libglu1-mesa-dev
+
+      - name: Configure CMake with coverage and tests
+        run: |
+          mkdir -p build
+          cd build
+          cmake -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DBUILD_TESTING=ON \
+            -DENABLE_COVERAGE=ON \
+            ..
+
+      - name: Build
+        run: cmake --build build --parallel "$(nproc)"
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure
+
+      - name: Capture coverage (lcov)
+        run: |
+          lcov --directory build --capture \
+               --output-file build/coverage.info \
+               --ignore-errors mismatch
+          # Limit the report to the project's own sources (exclude system,
+          # third-party, and test-framework code).
+          lcov --remove build/coverage.info \
+               '/usr/*' \
+               '*/lib/kissfft/*' \
+               '*/_deps/*' \
+               '*/tests/*' \
+               --output-file build/coverage.filtered.info \
+               --ignore-errors unused
+
+      - name: Generate HTML report
+        run: |
+          genhtml build/coverage.filtered.info \
+            --output-directory build/coverage-html
+
+      - name: Summarize coverage
+        run: |
+          lcov --summary build/coverage.filtered.info || true
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-coverage
+          path: |
+            build/coverage.info
+            build/coverage.filtered.info
+            build/coverage-html/
+          retention-days: 30

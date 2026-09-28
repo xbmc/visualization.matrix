@@ -1,5 +1,31 @@
+22.1.1
+- Updated GLM from 1.0.1 to 1.0.3
+- Updated ANGLE from chromium/3712 to kodi/7258
+- Updated translations
+
 22.1.0
-- Kodi visualization API update to version 4.1.0
+- Kodi visualization API update to version 5.0.0
+- Updated kissfft to version 131.2.0
+- Updated stb_image.h from 2.27 to 2.30
+
+22.0.3
+- Updated minimum add-on version requirements
+- Updated translations
+
+22.0.2
+- Use std::vector for audio data and magnitude buffers
+- Updated translations and corrected language directories
+
+22.0.1
+- Updated GLM to 1.0.1
+- Fixed OpenGL discovery on GLVND Linux systems
+- Updated translations
+
+22.0.0
+- Updated for Kodi 22 Piers
+
+21.0.0
+- Updated for Kodi 21 Omega
 
 20.2.0
 - Kodi visualization API update to version 4.0.0
